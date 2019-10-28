@@ -125,6 +125,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# IDEA
+.idea/
+
 # Project
 bgg_fr.sqlite
 bgg_en.sqlite
