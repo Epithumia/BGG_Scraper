@@ -34,11 +34,11 @@ def fetch_bgg(game_id):
 
 def languagedependence(data):
     try:
-        l = session.query(Verbosity).filter(Verbosity.text == data).one()
+        ld = session.query(Verbosity).filter(Verbosity.text == data).one()
     except NoResultFound:
-        l = Verbosity(text=data)
-        session.add(l)
-    return l
+        ld = Verbosity(text=data)
+        session.add(ld)
+    return ld
 
 
 def parse_person(person):
@@ -67,19 +67,19 @@ def parse_company(publisher):
     return c
 
 
-def parse_property(property, type):
-    if type == 'category':
+def parse_property(bgg_property, property_type):
+    if property_type == 'category':
         try:
-            p = session.query(Category).filter(Category.id == property['objectid']).one()
+            p = session.query(Category).filter(Category.id == bgg_property['objectid']).one()
         except NoResultFound:
-            p = Category(id=property['objectid'], name=property['name'])
+            p = Category(id=bgg_property['objectid'], name=bgg_property['name'])
             session.add(p)
         return p
-    elif type == 'mechanic':
+    elif property_type == 'mechanic':
         try:
-            p = session.query(Mechanic).filter(Mechanic.id == property['objectid']).one()
+            p = session.query(Mechanic).filter(Mechanic.id == bgg_property['objectid']).one()
         except NoResultFound:
-            p = Mechanic(id=property['objectid'], name=property['name'])
+            p = Mechanic(id=bgg_property['objectid'], name=bgg_property['name'])
             session.add(p)
         return p
     return None
@@ -116,10 +116,6 @@ def parse_game_data(game_data, game_stats):
         raise Exception()
     item = game_data['item']
     add = False
-    # print(item.keys())
-
-    # for key in item.keys():
-    #    print(key, item[key])
 
     try:
         b = session.query(Game).filter(Game.id == item['objectid']).one()
