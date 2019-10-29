@@ -106,6 +106,27 @@ class Category(Property):
     __mapper_args__ = {'polymorphic_identity': 'categoriejeu'}
 
 
+class NbPlayers(Base):
+    __tablename__ = 'NbJoueurs'
+
+    id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, ForeignKey('Jeu.NumJeu'), primary_key=True, name='NumJeu')
+    type = Column('type', String(20))
+    min = Column(Integer, name='MinNbJoueursVotes')
+    max = Column(Integer, name='MaxNbJoueursVotes')
+    __mapper_args__ = {'polymorphic_on': type}
+
+
+class Best(NbPlayers):
+    games = relationship('Game', backref="best")
+    __mapper_args__ = {'polymorphic_identity': 'top'}
+
+
+class Recommended(NbPlayers):
+    games = relationship('Game', backref="recommended")
+    __mapper_args__ = {'polymorphic_identity': 'recommandé'}
+
+
 class Label(Base):
     __tablename__ = 'Label'
 
@@ -139,12 +160,8 @@ class Game(Base):
     rank = Column(Integer, name='RangJeu')
     average_rating = Column(Float, name='NoteMoyJeu')
     bayes_average_rating = Column(Float, name='NoteMoyPondJeu')
-    best_minplayers = Column(Integer, name='MeilleurMinJouJeu')
-    best_maxplayers = Column(Integer, name='MeilleurMaxJouJeu')
-    recommended_minplayers = Column(Integer, name='MinJouRecomJeu')
-    recommended_maxplayers = Column(Integer, name='MaxJouRecomJeu')
     recommended_age = Column(String, name='AgeRecomJeu')
-    id_languagedependency = Column(Integer, ForeignKey(Verbosity.id))
+    id_languagedependency = Column(Integer, ForeignKey(Verbosity.id), name='NumDependanceL')
     languagedependency = relationship(Verbosity, back_populates='games')
     artists = relationship(Person,
                            secondary=artist_table,

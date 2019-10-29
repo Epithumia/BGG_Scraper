@@ -144,8 +144,6 @@ def parse_game_data(game_data, game_stats):
 
     if 'item' in game_stats.keys():
         stats = game_stats['item']
-        # for k in stats:
-        #    print(k, stats[k])
         for rankinfo in stats['rankinfo']:
             if rankinfo['veryshortprettyname'] == 'Overall':
                 b.rank = rankinfo['rank']
@@ -153,16 +151,18 @@ def parse_game_data(game_data, game_stats):
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
         p = stats['polls']
-        if len(p['userplayers']['best']) > 1:
-            print(b.id, 'has more than one best')
-        elif len(p['userplayers']['best']) == 1:
-            b.best_minplayers = p['userplayers']['best'][0]['min']
-            b.best_maxplayers = p['userplayers']['best'][0]['max']
-        if len(p['userplayers']['recommended']) > 1:
-            print(b.id, 'has more than one recommended')
-        elif len(p['userplayers']['recommended']) == 1:
-            b.recommended_minplayers = p['userplayers']['recommended'][0]['min']
-            b.recommended_maxplayers = p['userplayers']['recommended'][0]['max']
+        nbp_id = 0
+        for oldbest in b.best:
+            session.delete(oldbest)
+        for best in p['userplayers']['best']:
+            b.best.append(Best(id=nbp_id, min=best['min'], max=best['max']))
+            nbp_id += 1
+        for oldrecommended in b.recommended:
+            session.delete(oldrecommended)
+        for recommended in p['userplayers']['recommended']:
+            b.recommended.append(Recommended(id=nbp_id, min=recommended['min'], max=recommended['max']))
+            nbp_id += 1
+
         b.recommended_age = p['playerage']
 
         b.languagedependency = languagedependence(p['languagedependence'])
@@ -190,9 +190,6 @@ def parse_game_data(game_data, game_stats):
     for label in links['boardgamesubdomain']:
         b.subdomains.append(parse_label(label, 'subdomain'))
 
-    # for link in links:
-    #     print(link, links[link])
-
     pf_flag = False
     postfix = {'contains': [], 'reimplements': [], 'expandsboardgame': []}
 
@@ -209,8 +206,6 @@ def parse_game_data(game_data, game_stats):
         pf_flag = True
 
     # TODO: boardgameversion
-
-    # TODO: better recommended/best max/min players
 
     if add:
         session.add(b)
@@ -259,7 +254,8 @@ def process_fetch(queue):
             raise
     elif 'postfix' in thing.keys():
         g, subgames = thing["postfix"]
-        print(g.id, subgames)
+        if verbose:
+            print(g.id, subgames)
         for entry in subgames['contains']:
             game = db_fetch(entry)
             if not game:
@@ -299,12 +295,6 @@ def main(arguments):
     while not queue.empty():
         process_fetch(queue)
 
-        #     if arguments.v:
-        #         nb_games = session.query(Game).count()
-        #         nb_pers = session.query(Person).count()
-        #         nb_comp = session.query(Company).count()
-        #         print('Stats: ', nb_games, ' games, ', nb_pers, ' persons, ', nb_comp, ' companies')
-
 
 if __name__ == "__main__":
     # execute only if run as a script
@@ -323,11 +313,13 @@ if __name__ == "__main__":
     # Actual max right now : 300000
     args = parser.parse_args()
     if args.fr:
-        from db_fr import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain
+        from db_fr import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
+            Recommended
 
         engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
     else:
-        from db_en import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain
+        from db_en import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
+            Recommended
 
         engine = create_engine('sqlite:///bgg_en.sqlite', echo=False)
     if args.d:
@@ -335,6 +327,7 @@ if __name__ == "__main__":
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
-    lock = mp.Lock()
+
+    verbose = args.v
 
     main(args)

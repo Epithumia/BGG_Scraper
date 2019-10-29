@@ -96,6 +96,27 @@ class Category(Property):
     __mapper_args__ = {'polymorphic_identity': 'gamecategory'}
 
 
+class NbPlayers(Base):
+    __tablename__ = 'NbPlayers'
+
+    id = Column(Integer, primary_key=True)
+    game_id = Column(Integer, ForeignKey('Game.id'), primary_key=True)
+    type = Column('type', String(20))
+    min = Column(Integer)
+    max = Column(Integer)
+    __mapper_args__ = {'polymorphic_on': type}
+
+
+class Best(NbPlayers):
+    games = relationship('Game', backref="best")
+    __mapper_args__ = {'polymorphic_identity': 'best'}
+
+
+class Recommended(NbPlayers):
+    games = relationship('Game', backref="recommended")
+    __mapper_args__ = {'polymorphic_identity': 'recommended'}
+
+
 class Label(Base):
     __tablename__ = 'Label'
 
@@ -129,10 +150,6 @@ class Game(Base):
     rank = Column(Integer)
     average_rating = Column(Float)
     bayes_average_rating = Column(Float)
-    best_minplayers = Column(Integer)
-    best_maxplayers = Column(Integer)
-    recommended_minplayers = Column(Integer)
-    recommended_maxplayers = Column(Integer)
     recommended_age = Column(String)
     id_languagedependency = Column(Integer, ForeignKey(Verbosity.id))
     languagedependency = relationship(Verbosity, back_populates='games')
