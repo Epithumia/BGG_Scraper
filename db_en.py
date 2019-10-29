@@ -1,15 +1,21 @@
 from sqlalchemy import Column, Integer, String, Float, Table
 from sqlalchemy import ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
-Base = declarative_base()
+from meta import Base
+
+# Base = declarative_base()
 
 artist_table = Table('GameArtist', Base.metadata,
                      Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
                      Column('artist_id', Integer, ForeignKey('Person.id'), nullable=False, primary_key=True))
 
 designer_table = Table('GameDesigner', Base.metadata,
+                       Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
+                       Column('designer_id', Integer, ForeignKey('Person.id'), nullable=False, primary_key=True))
+
+producer_table = Table('GameProducer', Base.metadata,
                        Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
                        Column('designer_id', Integer, ForeignKey('Person.id'), nullable=False, primary_key=True))
 
@@ -28,13 +34,13 @@ category_table = Table('GameCategory', Base.metadata,
 family_table = Table('GameFamily', Base.metadata,
                      Column('game_id', Integer, ForeignKey('Game.id'), nullable=False,
                             primary_key=True),
-                     Column('family_id', Integer, ForeignKey('Label.id'), nullable=False,
+                     Column('family_id', Integer, ForeignKey('Family.id'), nullable=False,
                             primary_key=True))
 
 subdomain_table = Table('GameSubDomain', Base.metadata,
                         Column('game_id', Integer, ForeignKey('Game.id'), nullable=False,
                                primary_key=True),
-                        Column('subdomain_id', Integer, ForeignKey('Label.id'), nullable=False,
+                        Column('subdomain_id', Integer, ForeignKey('Family.id'), nullable=False,
                                primary_key=True))
 
 contains_table = Table('Contains', Base.metadata,
@@ -61,7 +67,6 @@ class Verbosity(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     text = Column(String, nullable=False)
-    games = relationship("Game", back_populates="languagedependency")
 
 
 class Company(Base):
@@ -71,12 +76,43 @@ class Company(Base):
     name = Column(String, nullable=False)
     website = Column(String, name='SiteWebCompagnie')
 
+    boardgames = relationship('BoardGame',
+                              secondary=publisher_table,
+                              backref="publishers")
+
 
 class Person(Base):
     __tablename__ = 'Person'
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
+
+    # Specific to BoardGames
+    boardgames_artist = relationship('BoardGame',
+                                     secondary=artist_table,
+                                     backref='artists')
+    boardgames_designer = relationship('BoardGame',
+                                       secondary=designer_table,
+                                       backref='designers')
+
+    # Specific to BG accesories
+    accessory_artist = relationship('BoardGameAccessory',
+                                    secondary=artist_table,
+                                    backref='artists')
+    accessory_designer = relationship('BoardGameAccessory',
+                                      secondary=designer_table,
+                                      backref='designers')
+
+    # Specific to rpgitems
+    rpg_artist = relationship('RolePlayingGame',
+                              secondary=artist_table,
+                              backref='artists')
+    rpg_designer = relationship('RolePlayingGame',
+                                secondary=designer_table,
+                                backref='designers')
+    rpg_producer = relationship('RolePlayingGame',
+                                secondary=producer_table,
+                                backref='producers')
 
 
 class Property(Base):
@@ -108,72 +144,63 @@ class NbPlayers(Base):
 
 
 class Best(NbPlayers):
-    games = relationship('Game', backref="best")
+    games = relationship('BoardGame', backref="best")
     __mapper_args__ = {'polymorphic_identity': 'best'}
 
 
 class Recommended(NbPlayers):
-    games = relationship('Game', backref="recommended")
+    games = relationship('BoardGame', backref="recommended")
     __mapper_args__ = {'polymorphic_identity': 'recommended'}
 
 
-class Label(Base):
-    __tablename__ = 'Label'
+class Family(Base):
+    __tablename__ = 'Family'
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     subtype = Column(String, nullable=False)
-    __mapper_args__ = {'polymorphic_on': subtype}
-
-
-class Family(Label):
-    __mapper_args__ = {'polymorphic_identity': 'family'}
     description = Column(String, name='Description')
 
+    __mapper_args__ = {'polymorphic_on': subtype,
+                       'polymorphic_identity': 'family'}
 
-class SubDomain(Label):
-    __mapper_args__ = {'polymorphic_identity': 'subdomain'}
+
+class BoardGameSubdomain(Family):
+    boardgames = relationship('BoardGame',
+                              secondary=subdomain_table,
+                              backref="boardgamesubdomains")
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgamesubdomain'}
+
+
+class BoardGameFamily(Family):
+    boardgames = relationship('BoardGame',
+                              secondary=family_table,
+                              backref="boardgamefamilies")
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgamefamily'}
 
 
 class Game(Base):
     __tablename__ = 'Game'
 
+    # Generic data
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     type = Column(String, nullable=False)
-    yearpublished = Column(Integer)
-    minplayers = Column(Integer)
-    maxplayers = Column(Integer)
-    minplaytime = Column(Integer)
-    maxplaytime = Column(Integer)
-    minage = Column(Integer)
+
+    # Common stats
     rank = Column(Integer)
+    usersrated = Column(Integer)
     average_rating = Column(Float)
     bayes_average_rating = Column(Float)
-    recommended_age = Column(String)
-    id_languagedependency = Column(Integer, ForeignKey(Verbosity.id))
-    languagedependency = relationship(Verbosity, back_populates='games')
-    artists = relationship(Person,
-                           secondary=artist_table,
-                           backref="games_art")
-    designers = relationship(Person,
-                             secondary=designer_table,
-                             backref="games_design")
-    publishers = relationship(Company,
-                              secondary=publisher_table,
-                              backref="games")
+
     categories = relationship(Category,
                               secondary=category_table,
                               backref="games_cat")
     mechanics = relationship(Mechanic,
                              secondary=mechanics_table,
                              backref="games_meca")
-    families = relationship(Family,
-                            secondary=family_table,
-                            backref="games_fam")
-    subdomains = relationship(SubDomain,
-                              secondary=subdomain_table,
-                              backref="games_sub")
     reimplements = relationship('Game',
                                 secondary=reimplements_table,
                                 primaryjoin=id == reimplements_table.c.reimplements_id,
@@ -189,3 +216,88 @@ class Game(Base):
                            primaryjoin=id == expands_table.c.expands_id,
                            secondaryjoin=id == expands_table.c.expanded_id,
                            backref="expanded")
+
+    __mapper_args__ = {'polymorphic_on': type}
+
+
+class BoardGame(Game):
+
+    @declared_attr
+    def yearpublished(selfself):
+        return Game.__table__.c.get('yearpublished', Column(Integer))
+
+    # Specific to BoardGames
+    minplayers = Column(Integer)
+    maxplayers = Column(Integer)
+    minplaytime = Column(Integer)
+    maxplaytime = Column(Integer)
+    minage = Column(Integer)
+    recommended_age = Column(String)
+    id_languagedependency = Column(Integer, ForeignKey(Verbosity.id))
+    languagedependency = relationship(Verbosity, backref='boardgames')
+
+    # TODO: boardgamecategory	1
+    # TODO: boardgamemechanic	9
+    # TODO: boardgameexpansion	81
+    # TODO: boardgameversion	98
+    # TODO: expandsboardgame	0
+    # TODO: boardgameintegration	0
+    # TODO: contains	0
+    # TODO: containedin	6
+    # TODO: reimplementation	30
+    # TODO: reimplements	0
+    # TODO: videogamebg	6
+    # TODO: boardgameaccessory	28
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgame'}
+
+
+class BoardGameAccessory(Game):
+
+    @declared_attr
+    def yearpublished(selfself):
+        return Game.__table__.c.get('yearpublished', Column(Integer))
+
+    # TODO: boardgamepublisher -> company
+    # TODO: bgaccessoryversion -> ???
+    # TODO: bgaccessoryfamily -> family
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgameaccessory'}
+
+
+class VideoGame(Game):
+    # TODO: videogameplatform	1
+    # TODO: videogamegenre	1
+    # TODO: videogametheme	1
+    # TODO: videogamefranchise	0
+    # TODO: videogameseries	0
+    # TODO: videogamemode	1
+    # TODO: videogamedeveloper	1
+    # TODO: videogamepublisher	1
+    # TODO: videogameexpansion	0
+    # TODO: expandsvideogame	0
+    # TODO: contains	0
+    # TODO: containedin	0
+
+    __mapper_args__ = {'polymorphic_identity': 'videogame'}
+
+
+class RolePlayingGame(Game):
+
+    @declared_attr
+    def yearpublished(selfself):
+        return Game.__table__.c.get('yearpublished', Column(Integer))
+
+    # TODO: rpg -> family
+    # TODO: rpggenre -> family
+    # TODO: rpgsetting -> family
+    # TODO: rpgseries -> family
+    # TODO: rpgcategory -> property
+    # TODO: rpgmechanic -> property
+    # TODO: rpgpublisher -> company
+
+    __mapper_args__ = {'polymorphic_identity': 'rpgitem'}
+
+
+class RPGIssue(Game):
+    __mapper_args__ = {'polymorphic_identity': 'rpgissue'}

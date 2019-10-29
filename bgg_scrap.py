@@ -86,11 +86,11 @@ def parse_property(bgg_property, property_type):
 
 
 def parse_label(label, subtype):
-    if subtype == 'family':
+    if subtype == 'boardgamefamily':
         try:
             f = session.query(Family).filter(Family.id == label['objectid']).one()
         except NoResultFound:
-            f = Family(id=label['objectid'], name=label['name'])
+            f = BoardGameFamily(id=label['objectid'], name=label['name'])
             url = 'https://api.geekdo.com/api/geekitems?objectid=' + str(label['objectid']) + '&objecttype=family'
             with urllib.request.urlopen(url) as u:
                 family_data = json.loads(u.read().decode())
@@ -101,16 +101,16 @@ def parse_label(label, subtype):
             f.description = description
             session.add(f)
         return f
-    elif subtype == 'subdomain':
+    elif subtype == 'boardgamesubdomain':
         try:
-            f = session.query(SubDomain).filter(SubDomain.id == label['objectid']).one()
+            f = session.query(BoardGameSubdomain).filter(BoardGameSubdomain.id == label['objectid']).one()
         except NoResultFound:
-            f = SubDomain(id=label['objectid'], name=label['name'])
+            f = BoardGameSubdomain(id=label['objectid'], name=label['name'])
             session.add(f)
         return f
     return None
 
-
+# TODO: one function per game subtype
 def parse_game_data(game_data, game_stats):
     if 'item' not in game_data.keys():
         raise Exception()
@@ -118,10 +118,10 @@ def parse_game_data(game_data, game_stats):
     add = False
 
     try:
-        b = session.query(Game).filter(Game.id == item['objectid']).one()
+        b = session.query(BoardGame).filter(BoardGame.id == item['objectid']).one()
     except NoResultFound:
         add = True
-        b = Game(id=item['objectid'], name=item['name'])
+        b = BoardGame(id=item['objectid'], name=item['name'])
     b.type = item['subtype']
     if b.type in ['videogame']:
         if add:
@@ -181,10 +181,10 @@ def parse_game_data(game_data, game_stats):
         b.mechanics.append(parse_property(mechanic, 'mechanic'))
 
     for label in links['boardgamefamily']:
-        b.families.append(parse_label(label, 'family'))
+        b.boardgamefamilies.append(parse_label(label, 'boardgamefamily'))
 
     for label in links['boardgamesubdomain']:
-        b.subdomains.append(parse_label(label, 'subdomain'))
+        b.boardgamesubdomains.append(parse_label(label, 'boardgamesubdomain'))
 
     pf_flag = False
     postfix = {'contains': [], 'reimplements': [], 'expandsboardgame': []}
@@ -308,14 +308,16 @@ if __name__ == "__main__":
                         help="Verbose")
     # Actual max right now : 300000
     args = parser.parse_args()
+    from meta import Base
     if args.fr:
-        from db_fr import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
-            Recommended
+        pass
+        #from db_fr import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
+        #    Recommended
 
-        engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
+        #engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
     else:
-        from db_en import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
-            Recommended
+        from db_en import Game, BoardGame, Verbosity, Person, Company, Category, Mechanic, Family, BoardGameSubdomain, Best, \
+            Recommended, BoardGameFamily
 
         engine = create_engine('sqlite:///bgg_en.sqlite', echo=False)
     if args.d:
