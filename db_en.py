@@ -84,6 +84,10 @@ class Company(Base):
                                         secondary=publisher_table,
                                         backref="publishers")
 
+    rpgs = relationship('RolePlayingGame',
+                        secondary=publisher_table,
+                        backref="publishers")
+
 
 class Person(Base):
     __tablename__ = 'Person'
@@ -133,6 +137,10 @@ class Mechanic(Property):
                               secondary=mechanics_table,
                               backref='mechanics')
 
+    roleplayinggames = relationship('RolePlayingGame',
+                                    secondary=mechanics_table,
+                                    backref='mechanics')
+
     __mapper_args__ = {'polymorphic_identity': 'gamemechanic'}
 
 
@@ -140,6 +148,10 @@ class Category(Property):
     boardgames = relationship('BoardGame',
                               secondary=category_table,
                               backref='categories')
+
+    roleplayinggame = relationship('RolePlayingGame',
+                                   secondary=category_table,
+                                   backref='categories')
 
     __mapper_args__ = {'polymorphic_identity': 'gamecategory'}
 
@@ -290,9 +302,6 @@ class RolePlayingGame(Game):
     # TODO: rpggenre -> family
     # TODO: rpgsetting -> family
     # TODO: rpgseries -> family
-    # TODO: rpgcategory -> property
-    # TODO: rpgmechanic -> property
-    # TODO: rpgpublisher -> company
 
     __mapper_args__ = {'polymorphic_identity': 'rpgitem'}
 
