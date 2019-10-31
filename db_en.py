@@ -80,6 +80,10 @@ class Company(Base):
                               secondary=publisher_table,
                               backref="publishers")
 
+    boardgameaccessories = relationship('BoardGameAccessory',
+                                        secondary=publisher_table,
+                                        backref="publishers")
+
 
 class Person(Base):
     __tablename__ = 'Person'
@@ -125,10 +129,18 @@ class Property(Base):
 
 
 class Mechanic(Property):
+    boardgames = relationship('BoardGame',
+                              secondary=mechanics_table,
+                              backref='mechanics')
+
     __mapper_args__ = {'polymorphic_identity': 'gamemechanic'}
 
 
 class Category(Property):
+    boardgames = relationship('BoardGame',
+                              secondary=category_table,
+                              backref='categories')
+
     __mapper_args__ = {'polymorphic_identity': 'gamecategory'}
 
 
@@ -195,28 +207,6 @@ class Game(Base):
     average_rating = Column(Float)
     bayes_average_rating = Column(Float)
 
-    categories = relationship(Category,
-                              secondary=category_table,
-                              backref="games_cat")
-    mechanics = relationship(Mechanic,
-                             secondary=mechanics_table,
-                             backref="games_meca")
-    reimplements = relationship('Game',
-                                secondary=reimplements_table,
-                                primaryjoin=id == reimplements_table.c.reimplements_id,
-                                secondaryjoin=id == reimplements_table.c.reimplemented_id,
-                                backref="reimplemented")
-    contains = relationship('Game',
-                            secondary=contains_table,
-                            primaryjoin=id == contains_table.c.contains_id,
-                            secondaryjoin=id == contains_table.c.contained_id,
-                            backref="contained")
-    expands = relationship('Game',
-                           secondary=expands_table,
-                           primaryjoin=id == expands_table.c.expands_id,
-                           secondaryjoin=id == expands_table.c.expanded_id,
-                           backref="expanded")
-
     __mapper_args__ = {'polymorphic_on': type}
 
 
@@ -236,16 +226,26 @@ class BoardGame(Game):
     id_languagedependency = Column(Integer, ForeignKey(Verbosity.id))
     languagedependency = relationship(Verbosity, backref='boardgames')
 
-    # TODO: boardgamecategory	1
-    # TODO: boardgamemechanic	9
-    # TODO: boardgameexpansion	81
+    contains = relationship('BoardGame',
+                            secondary=contains_table,
+                            primaryjoin='BoardGame.id == Contains.c.contains_id',
+                            secondaryjoin='BoardGame.id == Contains.c.contained_id',
+                            backref="contained")
+
+    reimplements = relationship('Game',
+                                secondary=reimplements_table,
+                                primaryjoin='BoardGame.id == Reimplements.c.reimplements_id',
+                                secondaryjoin='BoardGame.id == Reimplements.c.reimplemented_id',
+                                backref="reimplemented")
+
+    expands = relationship('Game',
+                           secondary=expands_table,
+                           primaryjoin='BoardGame.id == Expands.c.expands_id',
+                           secondaryjoin='BoardGame.id == Expands.c.expanded_id',
+                           backref="expanded")
+
     # TODO: boardgameversion	98
-    # TODO: expandsboardgame	0
     # TODO: boardgameintegration	0
-    # TODO: contains	0
-    # TODO: containedin	6
-    # TODO: reimplementation	30
-    # TODO: reimplements	0
     # TODO: videogamebg	6
     # TODO: boardgameaccessory	28
 
@@ -258,9 +258,7 @@ class BoardGameAccessory(Game):
     def yearpublished(selfself):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
-    # TODO: boardgamepublisher -> company
     # TODO: bgaccessoryversion -> ???
-    # TODO: bgaccessoryfamily -> family
 
     __mapper_args__ = {'polymorphic_identity': 'boardgameaccessory'}
 
