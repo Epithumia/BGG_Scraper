@@ -23,6 +23,10 @@ publisher_table = Table('GamePublisher', Base.metadata,
                         Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
                         Column('publisher_id', Integer, ForeignKey('Company.id'), nullable=False, primary_key=True))
 
+developer_table = Table('GameDeveloper', Base.metadata,
+                        Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
+                        Column('developer_id', Integer, ForeignKey('Company.id'), nullable=False, primary_key=True))
+
 mechanics_table = Table('GameMechanics', Base.metadata,
                         Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
                         Column('property_id', Integer, ForeignKey('Property.id'), nullable=False, primary_key=True))
@@ -61,6 +65,17 @@ expands_table = Table('Expands', Base.metadata,
                       Column('expanded_id', Integer, ForeignKey('Game.id'), nullable=False,
                              primary_key=True))
 
+bg_vg_table = Table('VGAdaptation', Base.metadata,
+                    Column('adapts_id', Integer, ForeignKey('Game.id'), nullable=False,
+                           primary_key=True),
+                    Column('adapted_id', Integer, ForeignKey('Game.id'), nullable=False,
+                           primary_key=True))
+
+
+# TODO: genre_table
+# TODO: series_table
+# TODO: settings_table
+
 
 class Verbosity(Base):
     __tablename__ = 'LanguageDependency'
@@ -81,6 +96,14 @@ class Company(Base):
                               backref="publishers")
 
     boardgameaccessories = relationship('BoardGameAccessory',
+                                        secondary=publisher_table,
+                                        backref="publishers")
+
+    videogames_developed = relationship('VideoGame',
+                                        secondary=developer_table,
+                                        backref="developers")
+
+    videogames_published = relationship('VideoGame',
                                         secondary=publisher_table,
                                         backref="publishers")
 
@@ -229,8 +252,14 @@ class BoardGame(Game):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
     # Specific to BoardGames
-    minplayers = Column(Integer)
-    maxplayers = Column(Integer)
+    @declared_attr
+    def minplayers(self):
+        return Game.__table__.c.get('minplayers', Column(Integer))
+
+    @declared_attr
+    def maxplayers(self):
+        return Game.__table__.c.get('maxplayers', Column(Integer))
+
     minplaytime = Column(Integer)
     maxplaytime = Column(Integer)
     minage = Column(Integer)
@@ -256,10 +285,10 @@ class BoardGame(Game):
                            secondaryjoin='BoardGame.id == Expands.c.expanded_id',
                            backref="expanded")
 
-    # TODO: boardgameversion	98
-    # TODO: boardgameintegration	0
-    # TODO: videogamebg	6
-    # TODO: boardgameaccessory	28
+    # TODO: boardgameversion -> version
+    # TODO: boardgameintegration -> boardgame
+    # TODO: boardgamesubdomain -> family
+    # TODO: boardgameaccessory -> bgaccessory
 
     __mapper_args__ = {'polymorphic_identity': 'boardgame'}
 
@@ -267,27 +296,45 @@ class BoardGame(Game):
 class BoardGameAccessory(Game):
 
     @declared_attr
-    def yearpublished(selfself):
+    def yearpublished(self):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
-    # TODO: bgaccessoryversion -> ???
+    # TODO: bgaccessoryversion -> version
 
     __mapper_args__ = {'polymorphic_identity': 'boardgameaccessory'}
 
 
 class VideoGame(Game):
-    # TODO: videogameplatform	1
-    # TODO: videogamegenre	1
-    # TODO: videogametheme	1
-    # TODO: videogamefranchise	0
-    # TODO: videogameseries	0
-    # TODO: videogamemode	1
-    # TODO: videogamedeveloper	1
-    # TODO: videogamepublisher	1
-    # TODO: videogameexpansion	0
-    # TODO: expandsvideogame	0
-    # TODO: contains	0
-    # TODO: containedin	0
+    @declared_attr
+    def minplayers(self):
+        return Game.__table__.c.get('minplayers', Column(Integer))
+
+    @declared_attr
+    def maxplayers(self):
+        return Game.__table__.c.get('maxplayers', Column(Integer))
+
+    @declared_attr
+    def yearpublished(self):
+        """
+        Actually a date (YYYY-MM-DD) that needs to be parsed
+        """
+        return Game.__table__.c.get('yearpublished', Column(Integer))
+
+    # TODO: videogameplatform -> family
+    # TODO: videogamegenre -> property
+    # TODO: videogametheme -> property
+    # TODO: videogamefranchise -> family
+    # TODO: videogameseries -> family
+    # TODO: videogamemode -> property
+
+    # TODO: expandsvideogame -> videogame
+    # TODO: contains -> videogame
+
+    adapts = relationship('Game',
+                          secondary=bg_vg_table,
+                          primaryjoin='VideoGame.id == VGAdaptation.c.adapts_id',
+                          secondaryjoin='BoardGame.id == VGAdaptation.c.adapted_id',
+                          backref="vgadaptation")
 
     __mapper_args__ = {'polymorphic_identity': 'videogame'}
 
