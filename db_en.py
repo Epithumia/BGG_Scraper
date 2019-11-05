@@ -65,11 +65,23 @@ expands_table = Table('Expands', Base.metadata,
                       Column('expanded_id', Integer, ForeignKey('Game.id'), nullable=False,
                              primary_key=True))
 
+integration_table = Table('Integration', Base.metadata,
+                          Column('integrates_id', Integer, ForeignKey('Game.id'), nullable=False,
+                                 primary_key=True),
+                          Column('integrated_id', Integer, ForeignKey('Game.id'), nullable=False,
+                                 primary_key=True))
+
 bg_vg_table = Table('VGAdaptation', Base.metadata,
                     Column('adapts_id', Integer, ForeignKey('Game.id'), nullable=False,
                            primary_key=True),
                     Column('adapted_id', Integer, ForeignKey('Game.id'), nullable=False,
                            primary_key=True))
+
+bg_accessory_table = Table('Accessory', Base.metadata,
+                           Column('accessory_id', Integer, ForeignKey('Game.id'), nullable=False,
+                                  primary_key=True),
+                           Column('boardgame_id', Integer, ForeignKey('Game.id'), nullable=False,
+                                  primary_key=True))
 
 
 # TODO: genre_table
@@ -273,22 +285,31 @@ class BoardGame(Game):
                             secondaryjoin='BoardGame.id == Contains.c.contained_id',
                             backref="contained")
 
-    reimplements = relationship('Game',
+    reimplements = relationship('BoardGame',
                                 secondary=reimplements_table,
                                 primaryjoin='BoardGame.id == Reimplements.c.reimplements_id',
                                 secondaryjoin='BoardGame.id == Reimplements.c.reimplemented_id',
                                 backref="reimplemented")
 
-    expands = relationship('Game',
+    expands = relationship('BoardGame',
                            secondary=expands_table,
                            primaryjoin='BoardGame.id == Expands.c.expands_id',
                            secondaryjoin='BoardGame.id == Expands.c.expanded_id',
                            backref="expanded")
 
     # TODO: boardgameversion -> version
-    # TODO: boardgameintegration -> boardgame
-    # TODO: boardgamesubdomain -> family
-    # TODO: boardgameaccessory -> bgaccessory
+
+    integrates = relationship('BoardGame',
+                              secondary=integration_table,
+                              primaryjoin='BoardGame.id == Integration.c.integrates_id',
+                              secondaryjoin='BoardGame.id == Integration.c.integrated_id',
+                              backref="integrated")
+
+    boardgameaccessories = relationship('Game',
+                                        secondary=bg_accessory_table,
+                                        primaryjoin='BoardGameAccessory.id == Accessory.c.accessory_id',
+                                        secondaryjoin='BoardGame.id == Accessory.c.boardgame_id',
+                                        backref="boardgames")
 
     __mapper_args__ = {'polymorphic_identity': 'boardgame'}
 
@@ -327,14 +348,23 @@ class VideoGame(Game):
     # TODO: videogameseries -> family
     # TODO: videogamemode -> property
 
-    # TODO: expandsvideogame -> videogame
-    # TODO: contains -> videogame
+    contains = relationship('VideoGame',
+                            secondary=contains_table,
+                            primaryjoin='VideoGame.id == Contains.c.contains_id',
+                            secondaryjoin='VideoGame.id == Contains.c.contained_id',
+                            backref="contained")
 
     adapts = relationship('Game',
                           secondary=bg_vg_table,
                           primaryjoin='VideoGame.id == VGAdaptation.c.adapts_id',
                           secondaryjoin='BoardGame.id == VGAdaptation.c.adapted_id',
                           backref="vgadaptation")
+
+    expands = relationship('VideoGame',
+                           secondary=expands_table,
+                           primaryjoin='VideoGame.id == Expands.c.expands_id',
+                           secondaryjoin='VideoGame.id == Expands.c.expanded_id',
+                           backref="expanded")
 
     __mapper_args__ = {'polymorphic_identity': 'videogame'}
 
