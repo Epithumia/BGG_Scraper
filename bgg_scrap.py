@@ -68,6 +68,7 @@ def parse_company(publisher):
 
 
 def parse_property(bgg_property, property_type):
+    # TODO: Category, Mechanic, VideoGameGenre, VideoGameTheme, VideoGameMode, Language
     if property_type == 'category':
         try:
             p = session.query(Category).filter(Category.id == bgg_property['objectid']).one()
@@ -85,7 +86,9 @@ def parse_property(bgg_property, property_type):
     return None
 
 
-def parse_label(label, subtype):
+def parse_family(label, subtype):
+    # TODO: boardgamesubdomain, boardgamefamily, videogamefranchise, videogameplatform,
+    # TODO: videogameseries, rpg, rpggenre, rpggenre, rpgsetting, rpgseries
     if subtype == 'boardgamefamily':
         try:
             f = session.query(Family).filter(Family.id == label['objectid']).one()
@@ -110,7 +113,8 @@ def parse_label(label, subtype):
         return f
     return None
 
-# TODO: one function per game subtype
+# TODO: one function per game subtype : BoardGame, BoardGameAccessory, VideoGame, RPGSeries,
+# TODO: RolePlayingGame, RPGIssue
 def parse_game_data(game_data, game_stats):
     if 'item' not in game_data.keys():
         raise Exception()
@@ -181,10 +185,10 @@ def parse_game_data(game_data, game_stats):
         b.mechanics.append(parse_property(mechanic, 'mechanic'))
 
     for label in links['boardgamefamily']:
-        b.boardgamefamilies.append(parse_label(label, 'boardgamefamily'))
+        b.boardgamefamilies.append(parse_family(label, 'boardgamefamily'))
 
     for label in links['boardgamesubdomain']:
-        b.boardgamesubdomains.append(parse_label(label, 'boardgamesubdomain'))
+        b.boardgamesubdomains.append(parse_family(label, 'boardgamesubdomain'))
 
     pf_flag = False
     postfix = {'contains': [], 'reimplements': [], 'expandsboardgame': []}
@@ -213,6 +217,7 @@ def parse_game_data(game_data, game_stats):
         postfix = None
     return postfix, b
 
+# TODO: parse_version
 
 def db_fetch(entry):
     try:
