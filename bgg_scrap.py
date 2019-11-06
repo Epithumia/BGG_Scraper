@@ -113,6 +113,7 @@ def parse_family(label, subtype):
         return f
     return None
 
+
 # TODO: one function per game subtype : BoardGame, BoardGameAccessory, VideoGame, RPGSeries,
 # TODO: RolePlayingGame, RPGIssue
 def parse_game_data(game_data, game_stats):
@@ -217,6 +218,7 @@ def parse_game_data(game_data, game_stats):
         postfix = None
     return postfix, b
 
+
 # TODO: parse_version
 
 def db_fetch(entry):
@@ -314,14 +316,16 @@ if __name__ == "__main__":
     # Actual max right now : 300000
     args = parser.parse_args()
     from meta import Base
-    if args.fr:
-        pass
-        #from db_fr import Base, Game, Verbosity, Person, Company, Category, Mechanic, Family, SubDomain, Best, \
-        #    Recommended
 
-        #engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
+    if args.fr:
+        from db_en import Game, BoardGame, Verbosity, Person, Company, Category, Mechanic, Family, BoardGameSubdomain, \
+            Best, \
+            Recommended, BoardGameFamily
+
+        engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
     else:
-        from db_en import Game, BoardGame, Verbosity, Person, Company, Category, Mechanic, Family, BoardGameSubdomain, Best, \
+        from db_en import Game, BoardGame, Verbosity, Person, Company, Category, Mechanic, Family, BoardGameSubdomain, \
+            Best, \
             Recommended, BoardGameFamily
 
         engine = create_engine('sqlite:///bgg_en.sqlite', echo=False)
