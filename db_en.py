@@ -99,6 +99,12 @@ vggenre_table = Table('VGGenre', Base.metadata,
                       Column('videogame_id', Integer, ForeignKey('Game.id'), nullable=False,
                              primary_key=True))
 
+language_table = Table('BoardGameLanguage', Base.metadata,
+                       Column('language_id', Integer, ForeignKey('Property.id'), nullable=False,
+                              primary_key=True),
+                       Column('boardgame_id', Integer, ForeignKey('Version.id'), nullable=False,
+                              primary_key=True))
+
 rpggenre_table = Table('RPGGenre', Base.metadata,
                        Column('genre_id', Integer, ForeignKey('Family.id'), nullable=False,
                               primary_key=True),
@@ -134,6 +140,24 @@ rpg_table = Table('RPGr', Base.metadata,
                          primary_key=True),
                   Column('roleplayinggame_id', Integer, ForeignKey('Game.id'), nullable=False,
                          primary_key=True))
+
+version_table = Table('GameVersion', Base.metadata,
+                      Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+                             primary_key=True),
+                      Column('game_id', Integer, ForeignKey('Game.id'), nullable=False,
+                             primary_key=True))
+
+publisher_version_table = Table('PublisherVersion', Base.metadata,
+                                Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+                                       primary_key=True),
+                                Column('publisher_id', Integer, ForeignKey('Company.id'), nullable=False,
+                                       primary_key=True))
+
+artist_version_table = Table('ArtistVersion', Base.metadata,
+                             Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+                                    primary_key=True),
+                             Column('artist_id', Integer, ForeignKey('Person.id'), nullable=False,
+                                    primary_key=True))
 
 
 class Verbosity(Base):
@@ -260,6 +284,14 @@ class VideoGameMode(Property):
                               backref='modes')
 
     __mapper_args__ = {'polymorphic_identity': 'videogamemode'}
+
+
+class Language(Property):
+    versions = relationship('Version',
+                            secondary=language_table,
+                            backref='languages')
+
+    __mapper_args__ = {'polymorphic_identity': 'language'}
 
 
 class NbPlayers(Base):
@@ -424,8 +456,6 @@ class BoardGame(Game):
                            secondaryjoin='BoardGame.id == Expands.c.expanded_id',
                            backref="expanded")
 
-    # TODO: boardgameversion -> version
-
     integrates = relationship('BoardGame',
                               secondary=integration_table,
                               primaryjoin='BoardGame.id == Integration.c.integrates_id',
@@ -446,8 +476,6 @@ class BoardGameAccessory(Game):
     @declared_attr
     def yearpublished(self):
         return Game.__table__.c.get('yearpublished', Column(Integer))
-
-    # TODO: bgaccessoryversion -> version
 
     __mapper_args__ = {'polymorphic_identity': 'boardgameaccessory'}
 
@@ -500,3 +528,40 @@ class RolePlayingGame(Game):
 
 class RPGIssue(Game):
     __mapper_args__ = {'polymorphic_identity': 'rpgissue'}
+
+
+class Version(Base):
+    __tablename__ = 'Version'
+
+    id = Column(Integer, primary_key=True)
+    linkedname = Column(String)
+    versionname = Column(String)
+    yearpublished = Column(Integer)
+    subtype = Column(String)
+
+    __mapper_args__ = {'polymorphic_on': subtype,
+                       'polymorphic_identity': 'version'}
+
+
+class BoardGameVersion(Version):
+    boardgames = relationship('BoardGame',
+                              secondary=version_table,
+                              backref="versions")
+
+    publishers = relationship('Company',
+                              secondary=publisher_version_table,
+                              backref="versions")
+
+    artists = relationship('Person',
+                           secondary=artist_version_table,
+                           backref="versions")
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgameversion'}
+
+
+class BoardGameAccessoryVersion(Version):
+    boardgameaccessories = relationship('BoardGameAccessory',
+                                        secondary=version_table,
+                                        backref="versions")
+
+    __mapper_args__ = {'polymorphic_identity': 'boardgameaccessoryversion'}
