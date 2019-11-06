@@ -5,8 +5,6 @@ from sqlalchemy.orm import relationship
 
 from meta import Base
 
-# Base = declarative_base()
-
 artist_table = Table('GameArtist', Base.metadata,
                      Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
                      Column('artist_id', Integer, ForeignKey('Person.id'), nullable=False, primary_key=True))
@@ -83,10 +81,29 @@ bg_accessory_table = Table('Accessory', Base.metadata,
                            Column('boardgame_id', Integer, ForeignKey('Game.id'), nullable=False,
                                   primary_key=True))
 
+theme_table = Table('Theme', Base.metadata,
+                    Column('theme_id', Integer, ForeignKey('Property.id'), nullable=False,
+                           primary_key=True),
+                    Column('videogame_id', Integer, ForeignKey('Game.id'), nullable=False,
+                           primary_key=True))
 
-# TODO: genre_table
-# TODO: series_table
-# TODO: settings_table
+mode_table = Table('Mode', Base.metadata,
+                   Column('mode_id', Integer, ForeignKey('Property.id'), nullable=False,
+                          primary_key=True),
+                   Column('videogame_id', Integer, ForeignKey('Game.id'), nullable=False,
+                          primary_key=True))
+
+vggenre_table = Table('VGGenre', Base.metadata,
+                      Column('genre_id', Integer, ForeignKey('Property.id'), nullable=False,
+                             primary_key=True),
+                      Column('videogame_id', Integer, ForeignKey('Game.id'), nullable=False,
+                             primary_key=True))
+
+rpggenre_table = Table('RPGGenre', Base.metadata,
+                       Column('genre_id', Integer, ForeignKey('Family.id'), nullable=False,
+                              primary_key=True),
+                       Column('roleplayinggame_id', Integer, ForeignKey('Game.id'), nullable=False,
+                              primary_key=True))
 
 
 class Verbosity(Base):
@@ -191,6 +208,30 @@ class Category(Property):
     __mapper_args__ = {'polymorphic_identity': 'gamecategory'}
 
 
+class VideoGameGenre(Property):
+    videogames = relationship('VideoGame',
+                              secondary=vggenre_table,
+                              backref='genres')
+
+    __mapper_args__ = {'polymorphic_identity': 'videogamegenre'}
+
+
+class VideoGameTheme(Property):
+    videogames = relationship('VideoGame',
+                              secondary=theme_table,
+                              backref='themes')
+
+    __mapper_args__ = {'polymorphic_identity': 'videogametheme'}
+
+
+class VideoGameMode(Property):
+    videogames = relationship('VideoGame',
+                              secondary=mode_table,
+                              backref='modes')
+
+    __mapper_args__ = {'polymorphic_identity': 'videogamemode'}
+
+
 class NbPlayers(Base):
     __tablename__ = 'NbPlayers'
 
@@ -240,6 +281,14 @@ class BoardGameFamily(Family):
     __mapper_args__ = {'polymorphic_identity': 'boardgamefamily'}
 
 
+class RPGGenre(Family):
+    rpgs = relationship('RolePlayingGame',
+                        secondary=rpggenre_table,
+                        backref="genres")
+
+    __mapper_args__ = {'polymorphic_identity': 'rpggenre'}
+
+
 class Game(Base):
     __tablename__ = 'Game'
 
@@ -260,7 +309,7 @@ class Game(Base):
 class BoardGame(Game):
 
     @declared_attr
-    def yearpublished(selfself):
+    def yearpublished(self):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
     # Specific to BoardGames
@@ -342,11 +391,8 @@ class VideoGame(Game):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
     # TODO: videogameplatform -> family
-    # TODO: videogamegenre -> property
-    # TODO: videogametheme -> property
     # TODO: videogamefranchise -> family
     # TODO: videogameseries -> family
-    # TODO: videogamemode -> property
 
     contains = relationship('VideoGame',
                             secondary=contains_table,
@@ -354,7 +400,7 @@ class VideoGame(Game):
                             secondaryjoin='VideoGame.id == Contains.c.contained_id',
                             backref="contained")
 
-    adapts = relationship('Game',
+    adapts = relationship('BoardGame',
                           secondary=bg_vg_table,
                           primaryjoin='VideoGame.id == VGAdaptation.c.adapts_id',
                           secondaryjoin='BoardGame.id == VGAdaptation.c.adapted_id',
@@ -372,11 +418,10 @@ class VideoGame(Game):
 class RolePlayingGame(Game):
 
     @declared_attr
-    def yearpublished(selfself):
+    def yearpublished(self):
         return Game.__table__.c.get('yearpublished', Column(Integer))
 
     # TODO: rpg -> family
-    # TODO: rpggenre -> family
     # TODO: rpgsetting -> family
     # TODO: rpgseries -> family
 
