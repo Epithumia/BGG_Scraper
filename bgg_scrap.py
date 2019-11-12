@@ -1,5 +1,6 @@
 import argparse
 import json
+import logging
 import multiprocessing as mp
 import urllib.request
 from json import JSONDecodeError
@@ -83,6 +84,9 @@ def parse_property(bgg_property, property_type):
             p = Mechanic(id=bgg_property['objectid'], name=bgg_property['name'])
             session.add(p)
         return p
+    else:
+        logger = logging.getLogger(__name__)
+        logger.warn(bgg_property)
     return None
 
 
@@ -114,27 +118,37 @@ def parse_family(label, subtype):
     return None
 
 
-# TODO: one function per game subtype : BoardGame, BoardGameAccessory, VideoGame, RPGSeries,
+# TODO: one function per game subtype : BoardGame, BoardGameAccessory, VideoGame,
 # TODO: RolePlayingGame, RPGIssue
 def parse_game_data(game_data, game_stats):
+    logger = logging.getLogger(__name__)
     if 'item' not in game_data.keys():
         raise Exception()
     item = game_data['item']
-    add = False
 
+    if item['subtype'] == 'boardgame':
+        return parse_boardgame(item, game_stats)
+    elif item['subtype'] == 'boardgameaccessory':
+        logger.info('boardgameaccessory')  # TODO : parse boardgameaccessory
+    elif item['subtype'] == 'videogame':
+        pass  # TODO : parse videogame
+    elif item['subtype'] == 'roleplayinggame':
+        pass  # TODO : parse roleplayinggame
+    elif item['subtype'] == 'rpgissue':
+        pass  # TODO : parse rpgissue
+    else:
+        logger.warning('Type inconnu : ' + item['subtype'] + ' (item #' + str(item['objectid']))
+
+
+def parse_boardgame(item, game_stats):
+    add = False
     try:
         b = session.query(BoardGame).filter(BoardGame.id == item['objectid']).one()
     except NoResultFound:
         add = True
         b = BoardGame(id=item['objectid'], name=item['name'])
     b.type = item['subtype']
-    if b.type in ['videogame']:
-        if add:
-            session.add(b)
-        else:
-            session.merge(b)
-        session.commit()
-        return None, b
+
     b.yearpublished = item['yearpublished']
 
     b.minplayers = item['minplayers']
@@ -311,6 +325,8 @@ if __name__ == "__main__":
                         help="Use French DB names")
     parser.add_argument('-d', action="store_true",
                         help="Debug")
+    parser.add_argument('-dsql', action="store_true",
+                        help="Debug SQL")
     parser.add_argument('-v', action="store_true",
                         help="Verbose")
     # Actual max right now : 300000
@@ -322,15 +338,15 @@ if __name__ == "__main__":
             Best, \
             Recommended, BoardGameFamily
 
-        engine = create_engine('sqlite:///bgg_fr.sqlite', echo=False)
+        engine = create_engine('sqlite:///bgg_fr.sqlite', echo=args.dsql)
     else:
         from db_en import Game, BoardGame, Verbosity, Person, Company, Category, Mechanic, Family, BoardGameSubdomain, \
             Best, \
             Recommended, BoardGameFamily
 
-        engine = create_engine('sqlite:///bgg_en.sqlite', echo=False)
+        engine = create_engine('sqlite:///bgg_en.sqlite', echo=args.dsql)
     if args.d:
-        engine = create_engine('sqlite:///:memory:', echo=True)
+        engine = create_engine('sqlite:///:memory:', echo=args.dsql)
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine)
     session = Session()
