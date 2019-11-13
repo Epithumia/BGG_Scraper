@@ -3,9 +3,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
-from meta import Base
-
-# TODO: translate
+from bgg_scrap.models.meta import Base
 
 artist_table = Table('GameArtist', Base.metadata,
                      Column('game_id', Integer, ForeignKey('Game.id'), nullable=False, primary_key=True),
