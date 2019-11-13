@@ -172,7 +172,7 @@ class Company(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    website = Column(String, name='SiteWebCompagnie')
+    website = Column(String)
 
     boardgames = relationship('BoardGame',
                               secondary=publisher_table,
