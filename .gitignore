@@ -131,3 +131,4 @@ dmypy.json
 # Project
 bgg_fr.sqlite
 bgg_en.sqlite
+cleanup.sh

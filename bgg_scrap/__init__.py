@@ -784,7 +784,7 @@ if __name__ == "__main__":
     from bgg_scrap.models.meta import Base
 
     if args.fr:
-        from bgg_scrap.models.db_en import *
+        from bgg_scrap.models.db_fr import *
 
         engine = create_engine('sqlite:///bgg_fr.sqlite', echo=args.dsql)
     else:
