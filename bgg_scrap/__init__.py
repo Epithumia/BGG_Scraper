@@ -586,7 +586,6 @@ def parse_boardgameaccessory(item, game_stats):
     except NoResultFound:
         add = True
         b = BoardGameAccessory(id=item['objectid'], name=item['name'])
-    b.type = item['subtype']
 
     b.yearpublished = item['yearpublished']
 
