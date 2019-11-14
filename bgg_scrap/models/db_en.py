@@ -102,7 +102,7 @@ vggenre_table = Table('VGGenre', Base.metadata,
 language_table = Table('BoardGameLanguage', Base.metadata,
                        Column('language_id', Integer, ForeignKey('Property.id'), nullable=False,
                               primary_key=True),
-                       Column('boardgame_id', Integer, ForeignKey('Version.id'), nullable=False,
+                       Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
                               primary_key=True))
 
 rpggenre_table = Table('RPGGenre', Base.metadata,
