@@ -5,72 +5,85 @@ from sqlalchemy.orm import relationship
 
 from bgg_scrap.models.meta import Base
 
-# TODO: translate
+artist_table = Table('ArtisteJeu', Base.metadata,
+                     Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                     Column('IdArtiste', Integer, ForeignKey('Personne.IdPersonne'), nullable=False, primary_key=True))
 
-artist_table = Table('GameArtist', Base.metadata,
-                     Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                     Column('artist_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False, primary_key=True))
-
+# TODO: translate table, column1, column2
 designer_table = Table('GameDesigner', Base.metadata,
                        Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                       Column('designer_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False, primary_key=True))
+                       Column('designer_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
+                              primary_key=True))
 
+# TODO: translate table
 producer_table = Table('GameProducer', Base.metadata,
-                       Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                       Column('designer_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False, primary_key=True))
+                       Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                       Column('IdProducteur', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
+                              primary_key=True))
 
-publisher_table = Table('GamePublisher', Base.metadata,
-                        Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                        Column('publisher_id', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False, primary_key=True))
+publisher_table = Table('EditeurJeu', Base.metadata,
+                        Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                        Column('IdEditeur', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
+                               primary_key=True))
 
+# TODO: translate table, column1, column2
 developer_table = Table('GameDeveloper', Base.metadata,
                         Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                        Column('developer_id', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False, primary_key=True))
+                        Column('developer_id', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
+                               primary_key=True))
 
-mechanics_table = Table('GameMechanics', Base.metadata,
-                        Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                        Column('property_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False, primary_key=True))
+mechanics_table = Table('MecaniqueJeu', Base.metadata,
+                        Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                        Column('IdMecanique', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+                               primary_key=True))
 
-category_table = Table('GameCategory', Base.metadata,
-                       Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                       Column('property_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False, primary_key=True))
+category_table = Table('CategorieJeu', Base.metadata,
+                       Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                       Column('IdCategorie', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+                              primary_key=True))
 
+# TODO: translate table, column1, column2
 family_table = Table('GameFamily', Base.metadata,
                      Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                             primary_key=True),
                      Column('family_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                             primary_key=True))
 
-subdomain_table = Table('GameSubDomain', Base.metadata,
-                        Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+subdomain_table = Table('SousDomaineJeu', Base.metadata,
+                        Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                primary_key=True),
-                        Column('subdomain_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+                        Column('IdSousDomaine', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                primary_key=True))
 
+# TODO: translate column1, column2
 contains_table = Table('Contenu', Base.metadata,
                        Column('contains_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True),
                        Column('contained_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
+# TODO: translate column1, column2
 reimplements_table = Table('Reimplementation', Base.metadata,
                            Column('reimplements_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True),
                            Column('reimplemented_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True))
 
-expands_table = Table('Expands', Base.metadata,
+# TODO: translate column1, column2
+expands_table = Table('Expansion', Base.metadata,
                       Column('expands_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True),
                       Column('expanded_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True))
 
+# TODO: translate column1, column2
 integration_table = Table('Integration', Base.metadata,
                           Column('integrates_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                  primary_key=True),
                           Column('integrated_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                  primary_key=True))
 
+# TODO: translate table, column1, column2
 bg_vg_table = Table('VGAdaptation', Base.metadata,
                     Column('adapts_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                            primary_key=True),
@@ -78,41 +91,43 @@ bg_vg_table = Table('VGAdaptation', Base.metadata,
                            primary_key=True))
 
 bg_accessory_table = Table('EstAccessoire', Base.metadata,
-                           Column('accessory_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                           Column('IdAccessoire', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True),
-                           Column('boardgame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                           Column('IdJeuSociete', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True))
 
 theme_table = Table('Theme', Base.metadata,
-                    Column('theme_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+                    Column('IdTheme', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
                            primary_key=True),
-                    Column('videogame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                    Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                            primary_key=True))
 
 mode_table = Table('Mode', Base.metadata,
-                   Column('mode_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+                   Column('IdMode', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
                           primary_key=True),
-                   Column('videogame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                   Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                           primary_key=True))
 
-vggenre_table = Table('VGGenre', Base.metadata,
-                      Column('genre_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+vggenre_table = Table('GenreJeuVideo', Base.metadata,
+                      Column('IdGenre', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
                              primary_key=True),
-                      Column('videogame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                      Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True))
 
-language_table = Table('BoardGameLanguage', Base.metadata,
-                       Column('language_id', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
+language_table = Table('Traduction', Base.metadata,
+                       Column('IdLangage', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
                               primary_key=True),
-                       Column('boardgame_id', Integer, ForeignKey('Version.id'), nullable=False,
+                       Column('IdVersion', Integer, ForeignKey('Version.IdVersion'), nullable=False,
                               primary_key=True))
 
+# TODO: translate table, column1, column2
 rpggenre_table = Table('RPGGenre', Base.metadata,
                        Column('genre_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                               primary_key=True),
                        Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
+# TODO: translate table, column1, column2
 series_table = Table('GameSeries', Base.metadata,
                      Column('series_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                             primary_key=True),
@@ -120,53 +135,55 @@ series_table = Table('GameSeries', Base.metadata,
                             primary_key=True))
 
 franchise_table = Table('Franchise', Base.metadata,
-                        Column('franchise_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+                        Column('IdFranchise', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                primary_key=True),
-                        Column('videogame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                        Column('IdJeuvideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                primary_key=True))
 
-platform_table = Table('Platform', Base.metadata,
-                       Column('platform_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+platform_table = Table('Plateforme', Base.metadata,
+                       Column('IdPlateforme', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                               primary_key=True),
-                       Column('videogame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                       Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
+# TODO: translate table, column1, column2
 rpgsetting_table = Table('Setting', Base.metadata,
                          Column('setting_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                 primary_key=True),
                          Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                 primary_key=True))
 
+# TODO: translate table, column1, column2
 rpg_table = Table('RPGr', Base.metadata,
                   Column('rpg_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                          primary_key=True),
                   Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                          primary_key=True))
 
-version_table = Table('GameVersion', Base.metadata,
-                      Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+version_table = Table('VersionJeu', Base.metadata,
+                      Column('IdVersion', Integer, ForeignKey('Version.IdVersion'), nullable=False,
                              primary_key=True),
-                      Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                      Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True))
 
-publisher_version_table = Table('PublisherVersion', Base.metadata,
-                                Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+publisher_version_table = Table('EditionVersion', Base.metadata,
+                                Column('IdVersion', Integer, ForeignKey('Version.IdVersion'), nullable=False,
                                        primary_key=True),
-                                Column('publisher_id', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
+                                Column('IdEditeur', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
                                        primary_key=True))
 
-artist_version_table = Table('ArtistVersion', Base.metadata,
-                             Column('version_id', Integer, ForeignKey('Version.id'), nullable=False,
+artist_version_table = Table('ArtisteVersion', Base.metadata,
+                             Column('IdVersion', Integer, ForeignKey('Version.IdVersion'), nullable=False,
                                     primary_key=True),
-                             Column('artist_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
+                             Column('IdArtiste', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
                                     primary_key=True))
 
 
 class Verbosity(Base):
     __tablename__ = 'DependanceLangage'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    text = Column(String, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True, name='IdDependance')
+    text = Column(String, nullable=False, name='LibelleDependance')
 
 
 class Company(Base):
@@ -249,7 +266,7 @@ class Mechanic(Property):
                                     secondary=mechanics_table,
                                     backref='mechanics')
 
-    __mapper_args__ = {'polymorphic_identity': 'mecaniquejeu'}
+    __mapper_args__ = {'polymorphic_identity': 'Mécanique de Jeu'}
 
 
 class Category(Property):
@@ -261,7 +278,7 @@ class Category(Property):
                                    secondary=category_table,
                                    backref='categories')
 
-    __mapper_args__ = {'polymorphic_identity': 'categoriejeu'}
+    __mapper_args__ = {'polymorphic_identity': 'Catégorie de Jeu'}
 
 
 class VideoGameGenre(Property):
@@ -269,7 +286,7 @@ class VideoGameGenre(Property):
                               secondary=vggenre_table,
                               backref='genres')
 
-    __mapper_args__ = {'polymorphic_identity': 'genrejeuvideo'}
+    __mapper_args__ = {'polymorphic_identity': 'Genre de Jeu Vidéo'}
 
 
 class VideoGameTheme(Property):
@@ -277,7 +294,7 @@ class VideoGameTheme(Property):
                               secondary=theme_table,
                               backref='themes')
 
-    __mapper_args__ = {'polymorphic_identity': 'themejeuvideo'}
+    __mapper_args__ = {'polymorphic_identity': 'Thème de Jeu Vidéo'}
 
 
 class VideoGameMode(Property):
@@ -285,7 +302,7 @@ class VideoGameMode(Property):
                               secondary=mode_table,
                               backref='modes')
 
-    __mapper_args__ = {'polymorphic_identity': 'modejeuvideo'}
+    __mapper_args__ = {'polymorphic_identity': 'Mode de Jeu Vidéo'}
 
 
 class Language(Property):
@@ -293,7 +310,7 @@ class Language(Property):
                             secondary=language_table,
                             backref='languages')
 
-    __mapper_args__ = {'polymorphic_identity': 'langage'}
+    __mapper_args__ = {'polymorphic_identity': 'Langage'}
 
 
 class NbPlayers(Base):
@@ -301,7 +318,7 @@ class NbPlayers(Base):
 
     id = Column(Integer, primary_key=True, name='IdNbJoueurs')
     game_id = Column(Integer, ForeignKey('Jeu.IdJeu'), primary_key=True, name='IdJeu')
-    type = Column('type', String(20))
+    type = Column('Type', String(20))
     min = Column(Integer)
     max = Column(Integer)
     __mapper_args__ = {'polymorphic_on': type}
@@ -309,12 +326,12 @@ class NbPlayers(Base):
 
 class Best(NbPlayers):
     games = relationship('BoardGame', backref="best")
-    __mapper_args__ = {'polymorphic_identity': 'meilleur'}
+    __mapper_args__ = {'polymorphic_identity': 'Meilleur'}
 
 
 class Recommended(NbPlayers):
     games = relationship('BoardGame', backref="recommended")
-    __mapper_args__ = {'polymorphic_identity': 'recommande'}
+    __mapper_args__ = {'polymorphic_identity': 'Recommandé'}
 
 
 class Family(Base):
@@ -326,7 +343,7 @@ class Family(Base):
     description = Column(String, name='Description')
 
     __mapper_args__ = {'polymorphic_on': subtype,
-                       'polymorphic_identity': 'famille'}
+                       'polymorphic_identity': 'Famille'}
 
 
 class BoardGameSubdomain(Family):
@@ -334,7 +351,7 @@ class BoardGameSubdomain(Family):
                               secondary=subdomain_table,
                               backref="boardgamesubdomains")
 
-    __mapper_args__ = {'polymorphic_identity': 'sous-domaine jeu de société'}
+    __mapper_args__ = {'polymorphic_identity': 'Sous-domaine jeu de société'}
 
 
 class BoardGameFamily(Family):
@@ -342,7 +359,7 @@ class BoardGameFamily(Family):
                               secondary=family_table,
                               backref="boardgamefamilies")
 
-    __mapper_args__ = {'polymorphic_identity': 'famille jeu de société'}
+    __mapper_args__ = {'polymorphic_identity': 'Famille jeu de société'}
 
 
 class VGFranchise(Family):
@@ -350,7 +367,7 @@ class VGFranchise(Family):
                               secondary=franchise_table,
                               backref="franchises")
 
-    __mapper_args__ = {'polymorphic_identity': 'franchise de jeu vidéo'}
+    __mapper_args__ = {'polymorphic_identity': 'Franchise de jeu vidéo'}
 
 
 class VGPlatforms(Family):
@@ -358,7 +375,7 @@ class VGPlatforms(Family):
                               secondary=platform_table,
                               backref="platforms")
 
-    __mapper_args__ = {'polymorphic_identity': 'plateforme de jeu vidéo'}
+    __mapper_args__ = {'polymorphic_identity': 'Plateforme de jeu vidéo'}
 
 
 class VGSeries(Family):
@@ -366,7 +383,7 @@ class VGSeries(Family):
                               secondary=series_table,
                               backref="series")
 
-    __mapper_args__ = {'polymorphic_identity': 'série de jeu vidéo'}
+    __mapper_args__ = {'polymorphic_identity': 'Série de jeu vidéo'}
 
 
 class RPG(Family):
@@ -374,7 +391,7 @@ class RPG(Family):
                         secondary=rpg_table,
                         backref="rpgs")
 
-    __mapper_args__ = {'polymorphic_identity': 'rpg'}
+    __mapper_args__ = {'polymorphic_identity': 'Famille RPG'}
 
 
 class RPGGenre(Family):
@@ -390,7 +407,7 @@ class RPGSetting(Family):
                         secondary=rpgsetting_table,
                         backref="settings")
 
-    __mapper_args__ = {'polymorphic_identity': 'rpgsetting'}
+    __mapper_args__ = {'polymorphic_identity': 'Cadre RPG'}
 
 
 class RPGSeries(Family):
@@ -413,7 +430,7 @@ class Game(Base):
     rank = Column(Integer, name='Rang')
     usersrated = Column(Integer, name='NoteUtilisateurs')
     average_rating = Column(Float, name='NoteMoyenne')
-    bayes_average_rating = Column(Float, name='NotePondérée')
+    bayes_average_rating = Column(Float, name='NotePonderee')
 
     __mapper_args__ = {'polymorphic_on': type}
 
@@ -422,21 +439,21 @@ class BoardGame(Game):
 
     @declared_attr
     def yearpublished(self):
-        return Game.__table__.c.get('yearpublished', Column(Integer))
+        return Game.__table__.c.get('AnneePublicationJeu', Column(Integer, name='AnneePublicationJeu'))
 
     # Specific to BoardGames
     @declared_attr
     def minplayers(self):
-        return Game.__table__.c.get('minplayers', Column(Integer))
+        return Game.__table__.c.get('NbJoueursMin', Column(Integer, name='NbJoueursMin'))
 
     @declared_attr
     def maxplayers(self):
-        return Game.__table__.c.get('maxplayers', Column(Integer))
+        return Game.__table__.c.get('NbJoueursMax', Column(Integer, name='NbJoueursMax'))
 
-    minplaytime = Column(Integer, name='DuréeMini')
-    maxplaytime = Column(Integer, name='DuréeMaxi')
+    minplaytime = Column(Integer, name='DureeMini')
+    maxplaytime = Column(Integer, name='DureeMaxi')
     minage = Column(Integer, name='AgeMini')
-    recommended_age = Column(String, name='AgeRecommandé')
+    recommended_age = Column(String, name='AgeRecommande')
     id_languagedependency = Column(Integer, ForeignKey(Verbosity.id), name='IdDepLang')
     languagedependency = relationship(Verbosity, backref='boardgames')
 
@@ -454,8 +471,8 @@ class BoardGame(Game):
 
     expands = relationship('BoardGame',
                            secondary=expands_table,
-                           primaryjoin='BoardGame.id == Expands.c.expands_id',
-                           secondaryjoin='BoardGame.id == Expands.c.expanded_id',
+                           primaryjoin='BoardGame.id == Expansion.c.expands_id',
+                           secondaryjoin='BoardGame.id == Expansion.c.expanded_id',
                            backref="expanded")
 
     integrates = relationship('BoardGame',
@@ -466,8 +483,8 @@ class BoardGame(Game):
 
     boardgameaccessories = relationship('Game',
                                         secondary=bg_accessory_table,
-                                        primaryjoin='BoardGameAccessory.id == EstAccessoire.c.accessory_id',
-                                        secondaryjoin='BoardGame.id == EstAccessoire.c.boardgame_id',
+                                        primaryjoin='BoardGameAccessory.id == EstAccessoire.c.IdAccessoire',
+                                        secondaryjoin='BoardGame.id == EstAccessoire.c.IdJeuSociete',
                                         backref="boardgames")
 
     __mapper_args__ = {'polymorphic_identity': 'Jeu de Société'}
@@ -477,26 +494,26 @@ class BoardGameAccessory(Game):
 
     @declared_attr
     def yearpublished(self):
-        return Game.__table__.c.get('yearpublished', Column(Integer))
+        return Game.__table__.c.get('AnneePublicationJeu', Column(Integer, name='AnneePublicationJeu'))
 
-    __mapper_args__ = {'polymorphic_identity': 'boardgameaccessory'}
+    __mapper_args__ = {'polymorphic_identity': 'Accessoire de Jeu de Société'}
 
 
 class VideoGame(Game):
     @declared_attr
     def minplayers(self):
-        return Game.__table__.c.get('minplayers', Column(Integer))
+        return Game.__table__.c.get('NbJoueursMin', Column(Integer, name='NbJoueursMin'))
 
     @declared_attr
     def maxplayers(self):
-        return Game.__table__.c.get('maxplayers', Column(Integer))
+        return Game.__table__.c.get('NbJoueursMax', Column(Integer, name='NbJoueursMax'))
 
     @declared_attr
     def yearpublished(self):
         """
         Actually a date (YYYY-MM-DD) that needs to be parsed
         """
-        return Game.__table__.c.get('yearpublished', Column(Integer))
+        return Game.__table__.c.get('AnneePublicationJeu', Column(Integer, name='AnneePublicationJeu'))
 
     contains = relationship('VideoGame',
                             secondary=contains_table,
@@ -512,8 +529,8 @@ class VideoGame(Game):
 
     expands = relationship('VideoGame',
                            secondary=expands_table,
-                           primaryjoin='VideoGame.id == Expands.c.expands_id',
-                           secondaryjoin='VideoGame.id == Expands.c.expanded_id',
+                           primaryjoin='VideoGame.id == Expansion.c.expands_id',
+                           secondaryjoin='VideoGame.id == Expansion.c.expanded_id',
                            backref="expanded")
 
     __mapper_args__ = {'polymorphic_identity': 'videogame'}
@@ -523,26 +540,26 @@ class RolePlayingGame(Game):
 
     @declared_attr
     def yearpublished(self):
-        return Game.__table__.c.get('yearpublished', Column(Integer))
+        return Game.__table__.c.get('AnneePublicationJeu', Column(Integer, name='AnneePublicationJeu'))
 
-    __mapper_args__ = {'polymorphic_identity': 'rpgitem'}
+    __mapper_args__ = {'polymorphic_identity': 'JDR'}
 
 
 class RPGIssue(Game):
-    __mapper_args__ = {'polymorphic_identity': 'rpgissue'}
+    __mapper_args__ = {'polymorphic_identity': 'Revue JDR'}
 
 
 class Version(Base):
     __tablename__ = 'Version'
 
-    id = Column(Integer, primary_key=True)
-    linkedname = Column(String)
-    versionname = Column(String)
-    yearpublished = Column(Integer)
-    subtype = Column(String)
+    id = Column(Integer, primary_key=True, name='IdVersion')
+    linkedname = Column(String, name='NomBaseJeu')
+    versionname = Column(String, name='NomVersion')
+    yearpublished = Column(Integer, name='AnneePublicationVersion')
+    subtype = Column(String, name='TypeVersion')
 
     __mapper_args__ = {'polymorphic_on': subtype,
-                       'polymorphic_identity': 'version'}
+                       'polymorphic_identity': 'Version'}
 
 
 class BoardGameVersion(Version):
@@ -558,7 +575,7 @@ class BoardGameVersion(Version):
                            secondary=artist_version_table,
                            backref="versions")
 
-    __mapper_args__ = {'polymorphic_identity': 'boardgameversion'}
+    __mapper_args__ = {'polymorphic_identity': 'Version de Jeu de Société'}
 
 
 class BoardGameAccessoryVersion(Version):
@@ -566,4 +583,4 @@ class BoardGameAccessoryVersion(Version):
                                         secondary=version_table,
                                         backref="versions")
 
-    __mapper_args__ = {'polymorphic_identity': 'boardgameaccessoryversion'}
+    __mapper_args__ = {'polymorphic_identity': 'Version d\'accessoire de Jeu de Société'}
