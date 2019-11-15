@@ -9,14 +9,12 @@ artist_table = Table('ArtisteJeu', Base.metadata,
                      Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
                      Column('IdArtiste', Integer, ForeignKey('Personne.IdPersonne'), nullable=False, primary_key=True))
 
-# TODO: translate table, column1, column2
-designer_table = Table('GameDesigner', Base.metadata,
-                       Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                       Column('designer_id', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
+designer_table = Table('ConcepteurJeu', Base.metadata,
+                       Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                       Column('IdConcepteur', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
                               primary_key=True))
 
-# TODO: translate table
-producer_table = Table('GameProducer', Base.metadata,
+producer_table = Table('ProducteurJeu', Base.metadata,
                        Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
                        Column('IdProducteur', Integer, ForeignKey('Personne.IdPersonne'), nullable=False,
                               primary_key=True))
@@ -26,10 +24,9 @@ publisher_table = Table('EditeurJeu', Base.metadata,
                         Column('IdEditeur', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
                                primary_key=True))
 
-# TODO: translate table, column1, column2
-developer_table = Table('GameDeveloper', Base.metadata,
-                        Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
-                        Column('developer_id', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
+developer_table = Table('DeveloppeurJeu', Base.metadata,
+                        Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),
+                        Column('IdDeveloppeur', Integer, ForeignKey('Compagnie.IdCompagnie'), nullable=False,
                                primary_key=True))
 
 mechanics_table = Table('MecaniqueJeu', Base.metadata,
@@ -42,11 +39,10 @@ category_table = Table('CategorieJeu', Base.metadata,
                        Column('IdCategorie', Integer, ForeignKey('Propriete.IdPropriete'), nullable=False,
                               primary_key=True))
 
-# TODO: translate table, column1, column2
-family_table = Table('GameFamily', Base.metadata,
-                     Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+family_table = Table('FamilleJeu', Base.metadata,
+                     Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                             primary_key=True),
-                     Column('family_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+                     Column('FamilleJeu', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                             primary_key=True))
 
 subdomain_table = Table('SousDomaineJeu', Base.metadata,
@@ -55,39 +51,39 @@ subdomain_table = Table('SousDomaineJeu', Base.metadata,
                         Column('IdSousDomaine', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                primary_key=True))
 
-# TODO: translate column1, column2
+# TODO: check relation sides
 contains_table = Table('Contenu', Base.metadata,
-                       Column('contains_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                       Column('IdJeuContenant', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True),
-                       Column('contained_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                       Column('IdJeuContenu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
-# TODO: translate column1, column2
+# TODO: check relation sides
 reimplements_table = Table('Reimplementation', Base.metadata,
-                           Column('reimplements_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                           Column('IdReimplementation', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True),
-                           Column('reimplemented_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                           Column('IdJeuBase', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True))
 
-# TODO: translate column1, column2
-expands_table = Table('Expansion', Base.metadata,
-                      Column('expands_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+# TODO: check relation sides
+expands_table = Table('Extension', Base.metadata,
+                      Column('IdExtension', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True),
-                      Column('expanded_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                      Column('IdJeuBase', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True))
 
-# TODO: translate column1, column2
+# TODO: check relation sides
 integration_table = Table('Integration', Base.metadata,
-                          Column('integrates_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                          Column('IdJeuIntegrateur', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                  primary_key=True),
-                          Column('integrated_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                          Column('IdJeuIntegre', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                  primary_key=True))
 
-# TODO: translate table, column1, column2
-bg_vg_table = Table('VGAdaptation', Base.metadata,
-                    Column('adapts_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+# TODO: check relation sides
+bg_vg_table = Table('AdaptationJeuVideo', Base.metadata,
+                    Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                            primary_key=True),
-                    Column('adapted_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                    Column('IdJeuPlateauAdapte', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                            primary_key=True))
 
 bg_accessory_table = Table('EstAccessoire', Base.metadata,
@@ -120,18 +116,16 @@ language_table = Table('Traduction', Base.metadata,
                        Column('IdVersion', Integer, ForeignKey('Version.IdVersion'), nullable=False,
                               primary_key=True))
 
-# TODO: translate table, column1, column2
-rpggenre_table = Table('RPGGenre', Base.metadata,
-                       Column('genre_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+rpggenre_table = Table('GenreJDR', Base.metadata,
+                       Column('IgGenre', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                               primary_key=True),
-                       Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                       Column('IdJDR', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
-# TODO: translate table, column1, column2
-series_table = Table('GameSeries', Base.metadata,
-                     Column('series_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+series_table = Table('SerieJeu', Base.metadata,
+                     Column('IdSerie', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                             primary_key=True),
-                     Column('game_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                     Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                             primary_key=True))
 
 franchise_table = Table('Franchise', Base.metadata,
@@ -146,18 +140,16 @@ platform_table = Table('Plateforme', Base.metadata,
                        Column('IdJeuVideo', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
-# TODO: translate table, column1, column2
-rpgsetting_table = Table('Setting', Base.metadata,
-                         Column('setting_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+rpgsetting_table = Table('Cadre', Base.metadata,
+                         Column('IdCadre', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                 primary_key=True),
-                         Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                         Column('IdJDR', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                 primary_key=True))
 
-# TODO: translate table, column1, column2
-rpg_table = Table('RPGr', Base.metadata,
-                  Column('rpg_id', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
+rpg_table = Table('SystemeJDR', Base.metadata,
+                  Column('IdSysteme', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                          primary_key=True),
-                  Column('roleplayinggame_id', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
+                  Column('IdJDR', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                          primary_key=True))
 
 version_table = Table('VersionJeu', Base.metadata,
@@ -459,26 +451,26 @@ class BoardGame(Game):
 
     contains = relationship('BoardGame',
                             secondary=contains_table,
-                            primaryjoin='BoardGame.id == Contenu.c.contains_id',
-                            secondaryjoin='BoardGame.id == Contenu.c.contained_id',
+                            primaryjoin='BoardGame.id == Contenu.c.IdJeuContenant',
+                            secondaryjoin='BoardGame.id == Contenu.c.IdJeuContenu',
                             backref="contained")
 
     reimplements = relationship('BoardGame',
                                 secondary=reimplements_table,
-                                primaryjoin='BoardGame.id == Reimplementation.c.reimplements_id',
-                                secondaryjoin='BoardGame.id == Reimplementation.c.reimplemented_id',
+                                primaryjoin='BoardGame.id == Reimplementation.c.IdReimplementation',
+                                secondaryjoin='BoardGame.id == Reimplementation.c.IdJeuBase',
                                 backref="reimplemented")
 
     expands = relationship('BoardGame',
                            secondary=expands_table,
-                           primaryjoin='BoardGame.id == Expansion.c.expands_id',
-                           secondaryjoin='BoardGame.id == Expansion.c.expanded_id',
+                           primaryjoin='BoardGame.id == Extension.c.IdExtension',
+                           secondaryjoin='BoardGame.id == Extension.c.IdJeuBase',
                            backref="expanded")
 
     integrates = relationship('BoardGame',
                               secondary=integration_table,
-                              primaryjoin='BoardGame.id == Integration.c.integrates_id',
-                              secondaryjoin='BoardGame.id == Integration.c.integrated_id',
+                              primaryjoin='BoardGame.id == Integration.c.IdJeuIntegrateur',
+                              secondaryjoin='BoardGame.id == Integration.c.IdJeuIntegre',
                               backref="integrated")
 
     boardgameaccessories = relationship('Game',
@@ -517,20 +509,20 @@ class VideoGame(Game):
 
     contains = relationship('VideoGame',
                             secondary=contains_table,
-                            primaryjoin='VideoGame.id == Contenu.c.contains_id',
-                            secondaryjoin='VideoGame.id == Contenu.c.contained_id',
+                            primaryjoin='VideoGame.id == Contenu.c.IdJeuContenant',
+                            secondaryjoin='VideoGame.id == Contenu.c.IdJeuContenu',
                             backref="contained")
 
     adapts = relationship('BoardGame',
                           secondary=bg_vg_table,
-                          primaryjoin='VideoGame.id == VGAdaptation.c.adapts_id',
-                          secondaryjoin='BoardGame.id == VGAdaptation.c.adapted_id',
+                          primaryjoin='VideoGame.id == AdaptationJeuVideo.c.IdJeuVideo',
+                          secondaryjoin='BoardGame.id == AdaptationJeuVideo.c.IdJeuPlateauAdapte',
                           backref="vgadaptation")
 
     expands = relationship('VideoGame',
                            secondary=expands_table,
-                           primaryjoin='VideoGame.id == Expansion.c.expands_id',
-                           secondaryjoin='VideoGame.id == Expansion.c.expanded_id',
+                           primaryjoin='VideoGame.id == Extension.c.IdExtension',
+                           secondaryjoin='VideoGame.id == Extension.c.IdJeuBase',
                            backref="expanded")
 
     __mapper_args__ = {'polymorphic_identity': 'videogame'}
