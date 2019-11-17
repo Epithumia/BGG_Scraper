@@ -412,6 +412,7 @@ class Game(Base):
     usersrated = Column(Integer)
     average_rating = Column(Float)
     bayes_average_rating = Column(Float)
+    complexity = Column(Float)
 
     __mapper_args__ = {'polymorphic_on': type}
 
