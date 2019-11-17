@@ -51,28 +51,24 @@ subdomain_table = Table('SousDomaineJeu', Base.metadata,
                         Column('IdSousDomaine', Integer, ForeignKey('Famille.IdFamille'), nullable=False,
                                primary_key=True))
 
-# TODO: check relation sides
 contains_table = Table('Contenu', Base.metadata,
                        Column('IdJeuContenant', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True),
                        Column('IdJeuContenu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                               primary_key=True))
 
-# TODO: check relation sides
 reimplements_table = Table('Reimplementation', Base.metadata,
                            Column('IdReimplementation', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True),
                            Column('IdJeuBase', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                   primary_key=True))
 
-# TODO: check relation sides
 expands_table = Table('Extension', Base.metadata,
                       Column('IdExtension', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True),
                       Column('IdJeuBase', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                              primary_key=True))
 
-# TODO: check relation sides
 integration_table = Table('Integration', Base.metadata,
                           Column('IdJeuIntegrateur', Integer, ForeignKey('Jeu.IdJeu'), nullable=False,
                                  primary_key=True),
@@ -420,7 +416,7 @@ class Game(Base):
 
     # Common stats
     rank = Column(Integer, name='Rang')
-    usersrated = Column(Integer, name='NoteUtilisateurs')
+    usersrated = Column(Integer, name='NbNotesUtilisateurs')
     average_rating = Column(Float, name='NoteMoyenne')
     bayes_average_rating = Column(Float, name='NotePonderee')
 
