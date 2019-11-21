@@ -2,10 +2,13 @@ import argparse
 import json
 import logging
 import multiprocessing as mp
+import pickle
 from datetime import datetime
 from json import JSONDecodeError
+from os import path
 from queue import Queue
 
+import tqdm
 import urllib3
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -17,8 +20,10 @@ def fetch_bgg(game_id):
     game_stats = {}
     url = 'https://api.geekdo.com/api/geekitems?objectid=' + str(game_id) + '&objecttype=thing'
     u = http.request('GET', url)
+    if u.status == 500:
+        return {'game': game_id, 'status': 500}, {}
     try:
-        game_data = json.loads(u.data.decode())
+        game_data = json.loads(u.data.decode().lstrip('.'))
     except JSONDecodeError:
         return {'game': game_id}, {}
     if int(game_data['item']['objectid']) != int(game_id):
@@ -27,7 +32,7 @@ def fetch_bgg(game_id):
         url = 'https://api.geekdo.com/api/dynamicinfo?objectid=' + str(game_id) + '&objecttype=thing'
         try:
             u = http.request('GET', url)
-            game_stats = json.loads(u.data.decode())
+            game_stats = json.loads(u.data.decode().lstrip('.'))
         except JSONDecodeError:
             return {'game': game_id}, {}
     return game_data, game_stats
@@ -200,8 +205,10 @@ def parse_family(label, subtype):
         return f
     elif subtype == 'videogameseries':
         try:
-            f = session.query(VGSeries).filter(VGSeries.id == label['objectid']).one()
+            f = session.query(Family).filter(Family.id == label['objectid']).one()
             logger.debug("     --> Exists")
+            if isinstance(f, VGFranchise):
+                return None
         except NoResultFound:
             f = VGSeries(id=label['objectid'], name=label['name'])
             logger.debug("     --> Added")
@@ -248,8 +255,11 @@ def parse_family(label, subtype):
 
 def parse_game_data(game_data, game_stats):
     if 'item' not in game_data.keys():
-        raise Exception()
+        raise Exception(game_data)
     item = game_data['item']
+    if item['itemstate'] != 'accepted':
+        logger.info(item['itemstate'] + ': ' + item['subtype'] + ' (item #' + str(item['objectid']) + ')')
+        return None, []
 
     if item['subtype'] == 'boardgame' or (item['subtype'] == 'boardgameexpansion' and 'boardgame' in item['subtypes']):
         logger.debug('boardgame')
@@ -258,7 +268,7 @@ def parse_game_data(game_data, game_stats):
         logger.debug('boardgameaccessory')
         return parse_boardgameaccessory(item, game_stats)
     elif item['subtype'] == 'videogame' or (
-            item['subtype'] == 'videogameexpansion' and 'videogame' in item['subtypes']):
+            item['subtype'] in ['videogameexpansion', 'videogamecompilation'] and 'videogame' in item['subtypes']):
         item['subtype'] = 'videogame'
         logger.debug('videogame')
         return parse_videogame(item, game_stats)
@@ -272,7 +282,7 @@ def parse_game_data(game_data, game_stats):
         logger.debug('version')
         return parse_version(item, item['subtype'])
     else:
-        logger.warning('Type inconnu : ' + item['subtype'] + ' (item #' + str(item['objectid']) + ')')
+        logger.warning('Type inconnu : ' + str(item['subtypes']) + ' (item #' + str(item['objectid']) + ')')
         return None, []
 
 
@@ -284,7 +294,7 @@ def parse_version(item, subtype):
             b = session.query(BoardGameVersion).filter(BoardGameVersion.id == item['objectid']).one()
         except NoResultFound:
             add = True
-            b = BoardGameVersion(id=item['objectid'], versionname=item['versionname'])
+            b = BoardGameVersion(id=item['objectid'])
         links = item['links']
         for artist in links['boardgameartist']:
             b.artists.append(parse_person(artist))
@@ -301,11 +311,16 @@ def parse_version(item, subtype):
             b = session.query(BoardGameAccessoryVersion).filter(BoardGameAccessoryVersion.id == item['objectid']).one()
         except NoResultFound:
             add = True
-            b = BoardGameAccessoryVersion(id=item['objectid'], versionname=item['versionname'])
+            b = BoardGameAccessoryVersion(id=item['objectid'])
     else:
         raise NotImplementedError()
 
-    b.linkedname = item['linkedname']
+    if 'versionname' in item.keys():
+        b.versionname = item['versionname']
+    elif 'name' in item.keys():
+        b.versionname = item['name']
+    if 'linkedname' in item.keys():
+        b.linkedname = item['linkedname']
 
     if add:
         session.add(b)
@@ -325,9 +340,11 @@ def parse_videogame(item, game_stats):
         add = True
         b = VideoGame(id=item['objectid'], name=item['name'])
     b.type = item['subtype']
-
-    dt = datetime.strptime(item['releasedate'], '%Y-%m-%d')
-    b.yearpublished = dt.year
+    try:
+        dt = datetime.strptime(item['releasedate'], '%Y-%m-%d')
+        b.yearpublished = dt.year
+    except ValueError:
+        pass
 
     b.minplayers = item['minplayers']
     b.maxplayers = item['maxplayers']
@@ -340,6 +357,8 @@ def parse_videogame(item, game_stats):
         s = stats['stats']
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
+        b.usersrated = s['usersrated']
+        b.complexity = s['avgweight']
 
     links = item['links']
 
@@ -365,7 +384,9 @@ def parse_videogame(item, game_stats):
         b.platforms.append(parse_family(platform, 'videogameplatform'))
 
     for series in links['videogameseries']:
-        b.series.append(parse_family(series, 'videogameseries'))
+        s = parse_family(series, 'videogameseries')
+        if s is not None:
+            b.series.append(s)
 
     pf_flag = False
     postfix = {'contains': [], 'expandsvideogame': []}
@@ -415,6 +436,8 @@ def parse_boardgame(item, game_stats):
         s = stats['stats']
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
+        b.usersrated = s['usersrated']
+        b.complexity = s['avgweight']
         p = stats['polls']
         nbp_id = 0
         for oldbest in b.best:
@@ -507,6 +530,8 @@ def parse_rpgissue(item, game_stats):
         s = stats['stats']
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
+        b.usersrated = s['usersrated']
+        b.complexity = s['avgweight']
 
     if add:
         session.add(b)
@@ -536,6 +561,8 @@ def parse_roleplayinggame(item, game_stats):
         s = stats['stats']
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
+        b.usersrated = s['usersrated']
+        b.complexity = s['avgweight']
 
     links = item['links']
 
@@ -597,6 +624,8 @@ def parse_boardgameaccessory(item, game_stats):
         s = stats['stats']
         b.average_rating = s['average']
         b.bayes_average_rating = s['baverage']
+        b.usersrated = s['usersrated']
+        b.complexity = s['avgweight']
 
     links = item['links']
 
@@ -648,12 +677,25 @@ def db_fetch_version(entry):
 
 def process_fetch(queue):
     thing = queue.get()
-    if 'games' in thing.keys():
-        fetched = [x[0] for x in session.query(Game.id).all()]
-        with mp.Pool(processes=4) as p:
-            results = p.map(fetch_bgg, [i for i in thing['games'] if i not in fetched])
-        final = [r for r in results if len(r[0]) > 0]
+    if 'games' in thing.keys() or 'resume' in thing.keys():
+        if 'resume' in thing.keys() and path.exists('fetched_data.pickle'):
+            logger.info('Loading saved data')
+            final = pickle.load(open('fetched_data.pickle', 'rb'))
+        else:
+            fetched = [x[0] for x in session.query(Game.id).all()]
+            to_fetch = [i for i in thing['games'] if i not in fetched]
+            if verbose:
+                logger.info('Fetching ' + str(len(to_fetch)) + ' items')
+            with mp.Pool(processes=4) as p:
+                results = list(tqdm.tqdm(p.imap(fetch_bgg, to_fetch), total=len(to_fetch)))
+            final = [r for r in results if len(r[0]) > 0]
+            pickle.dump(final, open('fetched_data.pickle', 'wb'))
+        rest = len(final)
+        if verbose:
+            logger.info('Parsing ' + str(rest) + ' items')
         for row in final:
+            if (rest - 1) % 10 == 0:
+                logger.info('... ' + str(rest) + ' remaining')
             game_data, game_stats = row
             if 'game' in game_data.keys():
                 queue.put(game_data)
@@ -663,16 +705,21 @@ def process_fetch(queue):
                     if postfix is not None:
                         queue.put({'postfix': (game, postfix)})
                 except:
-                    print(game_data)
+                    logger.error('Error with ' + str(game_data))
                     raise
+            rest -= 1
     elif 'game' in thing.keys():
         game_data, game_stats = fetch_bgg(thing['game'])
-        try:
-            postfix, game = parse_game_data(game_data, game_stats)
-            if postfix is not None:
-                queue.put({'postfix': (game, postfix)})
-        except:
-            raise
+        if 'status' in game_data.keys() and game_data['status'] == 500:
+            logger.error('Error 500 processing #' + str(thing['game']))
+        else:
+            try:
+                postfix, game = parse_game_data(game_data, game_stats)
+                if postfix is not None:
+                    queue.put({'postfix': (game, postfix)})
+            except:
+                logger.error('Error processing #' + str(thing['game']))
+                raise
     elif 'postfix' in thing.keys():
         g, subgames = thing["postfix"]
         if 'reimplements' not in subgames:
@@ -687,8 +734,6 @@ def process_fetch(queue):
             subgames['boardgameversion'] = []
         if 'bgaccessoryversion' not in subgames:
             subgames['bgaccessoryversion'] = []
-        if verbose:
-            print(g.id, subgames)
         for entry in subgames['contains']:
             game = db_fetch(entry)
             if not game:
@@ -728,13 +773,23 @@ def process_fetch(queue):
                 postfix, game = parse_game_data(entry_data, entry_stats)
                 if postfix is not None:
                     queue.put({'postfix': (game, postfix)})
-            g.boardgameaccessories.append(game)
+            if game:
+                g.boardgameaccessories.append(game)
         for entry in subgames['boardgameversion']:
             version = db_fetch_version(entry)
             if not version:
-                entry_data, entry_stats = fetch_version(entry)
-                _, version = parse_game_data(entry_data, entry_stats)
-            g.versions.append(version)
+                count = 0
+                while not version and count < 5:
+                    entry_data, entry_stats = fetch_version(entry)
+                    if 'item' in entry_data.keys():
+                        _, version = parse_game_data(entry_data, entry_stats)
+                    else:
+                        count += 1
+            if not version:
+                queue.put(thing)
+                logger.warning("Requeuing", thing)
+            else:
+                g.versions.append(version)
         for entry in subgames['bgaccessoryversion']:
             version = db_fetch_version(entry)
             if not version:
@@ -749,27 +804,39 @@ def process_fetch(queue):
 
 def main(arguments):
     queue = Queue()
-    if arguments.max_game_id is None:
+    if arguments.r:
+        queue.put({'resume': True})
+    elif arguments.max_game_id is None:
         if isinstance(arguments.game_id, int):
             queue.put({'game': arguments.game_id})
         else:
             [queue.put({'game': game_id}) for game_id in arguments.game_id]
     else:
-        queue.put({'games': [i + 1 for i in range(arguments.max_game_id)]})
+        if len(arguments.max_game_id) == 1:
+            queue.put({'games': [i + 1 for i in range(arguments.max_game_id[0])]})
+        elif len(arguments.max_game_id) == 2:
+            queue.put({'games': [i + 1 for i in range(arguments.max_game_id[0], arguments.max_game_id[1])]})
+        else:
+            raise argparse.ArgumentError()
     while not queue.empty():
+        if verbose:
+            qsize = queue.qsize()
+            logger.info('Processing queue ...' + str(qsize) + (' tasks remaining' if qsize > 1 else ' task remaining'))
         process_fetch(queue)
 
 
 if __name__ == "__main__":
     http = urllib3.PoolManager()
-    retries = Retry(connect=5, read=2, redirect=5)
+    retries = Retry(connect=5, read=2, redirect=5, backoff_factor=0.5)
     # execute only if run as a script
     parser = argparse.ArgumentParser(prog='bgg_scrap')
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-m", "--max-game-id", type=int, nargs='?', const=42,
+    group.add_argument("-m", "--max-game-id", type=int, nargs='+', default=42,
                        help="Parse all the games up to MAX_GAME_ID (~300000)")
     group.add_argument("-i", "--game-id", type=int, nargs='+', default=42,
                        help="Parse only GAME_ID")
+    group.add_argument('-r', '--recover', action='store_true', dest='r',
+                       help="Recover from saved data")
     parser.add_argument('-fr', action="store_true",
                         help="Use French DB names")
     parser.add_argument('-d', action="store_true",
@@ -798,6 +865,8 @@ if __name__ == "__main__":
     verbose = args.v
 
     logger = logging.getLogger(__name__)
+    if verbose:
+        logger.setLevel(logging.INFO)
     if args.d:
         logger.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
