@@ -465,8 +465,8 @@ class BoardGame(Game):
 
     boardgameaccessories = relationship('Game',
                                         secondary=bg_accessory_table,
-                                        primaryjoin='BoardGameAccessory.id == Accessory.c.accessory_id',
-                                        secondaryjoin='BoardGame.id == Accessory.c.boardgame_id',
+                                        secondaryjoin='BoardGameAccessory.id == Accessory.c.accessory_id',
+                                        primaryjoin='BoardGame.id == Accessory.c.boardgame_id',
                                         backref="boardgames")
 
     __mapper_args__ = {'polymorphic_identity': 'boardgame'}
