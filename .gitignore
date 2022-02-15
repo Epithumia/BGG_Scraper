@@ -133,3 +133,4 @@ bgg_fr.sqlite
 bgg_en.sqlite
 cleanup.sh
 /local/
+/fetched_data.pickle

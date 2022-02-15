@@ -2,7 +2,7 @@
 :
 Version: IdVersion, NomBaseJeu, NomVersion, AnneePublicationVersion, TypeVersion
 :::
-TravailVersion: IdPersonne->Personne->IdPersonne, _IdVersion->Version->IdVersion
+ArtisteVersion: IdPersonne->Personne->IdPersonne, _IdVersion->Version->IdVersion
 :::
 Personne: IdPersonne, NomPersonne
 :
@@ -10,13 +10,13 @@ Personne: IdPersonne, NomPersonne
 :
 
 :
-EditeurVersion: IdEditeur->Compagnie->IdCompagnie, _IdVersion->Version->IdVersion
+EditionVersion: IdEditeur->Compagnie->IdCompagnie, _IdVersion->Version->IdVersion
 :
-Langue: IdLangage->Propriete->IdPropriete, _IdVersion->Version->IdVersion
+Traduction: IdLangage->Propriete->IdPropriete, _IdVersion->Version->IdVersion
 :
 Propriete: IdPropriete, NomPropriete, TypePropriete
 :
-Mecanique: IdMecanique->Propriete->IdPropriete, _IdJeu->Jeu->IdJeu
+MecaniqueJeu: IdMecanique->Propriete->IdPropriete, _IdJeu->Jeu->IdJeu
 :::
 
 :
@@ -25,17 +25,22 @@ Mecanique: IdMecanique->Propriete->IdPropriete, _IdJeu->Jeu->IdJeu
 Compagnie: IdCompagnie, NomCompagnie, SiteWebCompagnie
 :
 VersionJeu: IdJeu->Jeu->IdJeu, _IdVersion->Version->IdVersion
+Mode: idMode->Propriete->IdPropriete, _IdJeu->Jeu->IdJeu
+CategorieJeu: IdJeu->Jeu->IdJeu, _IdCategorie->Propriete->IdPropriete
+Theme: idTheme->Propriete->IdPropriete, _IdJeuVideo->Jeu->IdJeu
+GenreJeuVideo: idGenre->Propriete->IdPropriete, _IdJeuVideo->Jeu->IdJeu
+ConcepteurJeu: IdConcepteur->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
 :
-Categorie: IdJeu->Jeu->IdJeu, _IdCategorie->Propriete->IdPropriete
-:
-Conception: IdConcepteur->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
-:
-Artiste: IdArtiste->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
+ArtisteJeu: IdArtiste->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
 :
 
 :
 Editeur: IdJeu->Jeu->IdJeu, _IdEditeur->Compagnie->IdCompagnie
+:
+DeveloppeurJeu: IdJeu->Jeu->IdJeu, _IdEditeur->Compagnie->IdCompagnie
 :::::
+ProducteurJeu: idProducteur->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
+:
 
 :
 Contenu: IdJeuContenant->Jeu->IdJeu, _IdJeuContenu->Jeu->IdJeu
@@ -47,21 +52,43 @@ Extension: IdJeuBase->Jeu->IdJeu, _IdExtension->Jeu->IdJeu
 NbJoueurs: IdJeu->Jeu->IdJeu, _IdNbJoueurs, Type, Minimum, Maximum
 :
 
+:
+AdaptationJeu: IdJeuVideo->Jeu->IdJeu, _IdJeuPlateauAdapte->Jeu->IdJeu
+:
+Integration: IdJeuIntegrateur->Jeu->IdJeu, _IdJeuIntegre->Jeu->IdJeu
+:
 DependanceLangage: IdDependance, LibelleDependance
+::::
+:
 
 :
 SousDomaineJeu: IdJeu->Jeu->IdJeu, _IdSousDomaine->Famille->IdFamille
 :::
 Reimplementation: IdJeuBase->Jeu->IdJeu, _IdReimplementation->Jeu->IdJeu
 :
-Accessoire: IdJeuSociete->Jeu->IdJeu, _IdAccessoire->Jeu->IdJeu
+EstAccessoire: IdJeuSociete->Jeu->IdJeu, _IdAccessoire->Jeu->IdJeu
 
 
 :
-Famille: IdFamille, NomFamille, SousTypeFamille, Description
+:
 :
 FamilleJeu: IdJeu->Jeu->IdJeu, _FamilleJeu->Famille->IdFamille
-::::
 :
-::
+SystemeJDR: IdJDR->Jeu->IdJeu, _IdSysteme->Famille->IdFamille
+:
+Plateforme: IdJeuVideo->Jeu->IdJeu, _IdPlateforme->Famille->IdFamille
+:
+Franchise: IdJeuVideo->Jeu->IdJeu, _IdFranchise->Famille->IdFamille
+:
 
+:
+Cadre: IdJDR->Jeu->IdJeu, _IdCadre->Famille->IdFamille
+:
+GenreJDR: IdJDR->Jeu->IdJeu, _IdGenre->Famille->IdFamille
+:
+SerieJeu: IdJeu->Jeu->IdJeu, _IdSerie->Famille->IdFamille
+:::::
+
+:::::
+Famille: IdFamille, NomFamille, SousTypeFamille, Description
+:::::
