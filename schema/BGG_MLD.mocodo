@@ -1,0 +1,67 @@
+%%mocodo
+:
+Version: IdVersion, NomBaseJeu, NomVersion, AnneePublicationVersion, TypeVersion
+:::
+TravailVersion: IdPersonne->Personne->IdPersonne, _IdVersion->Version->IdVersion
+:::
+Personne: IdPersonne, NomPersonne
+:
+
+:
+
+:
+EditeurVersion: IdEditeur->Compagnie->IdCompagnie, _IdVersion->Version->IdVersion
+:
+Langue: IdLangage->Propriete->IdPropriete, _IdVersion->Version->IdVersion
+:
+Propriete: IdPropriete, NomPropriete, TypePropriete
+:
+Mecanique: IdMecanique->Propriete->IdPropriete, _IdJeu->Jeu->IdJeu
+:::
+
+:
+
+:
+Compagnie: IdCompagnie, NomCompagnie, SiteWebCompagnie
+:
+VersionJeu: IdJeu->Jeu->IdJeu, _IdVersion->Version->IdVersion
+:
+Categorie: IdJeu->Jeu->IdJeu, _IdCategorie->Propriete->IdPropriete
+:
+Conception: IdConcepteur->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
+:
+Artiste: IdArtiste->Personne->IdPersonne, _IdJeu->Jeu->IdJeu
+:
+
+:
+Editeur: IdJeu->Jeu->IdJeu, _IdEditeur->Compagnie->IdCompagnie
+:::::
+
+:
+Contenu: IdJeuContenant->Jeu->IdJeu, _IdJeuContenu->Jeu->IdJeu
+:::
+Jeu: IdJeu, NomJeu, TypeJeu, Rang, NbNotesUtilisateurs, NoteMoyenne, NotePonderee, Complexite, AnneePublicationJeu, NbJoueurMin, NbJoueurMax, DureeMini, DureeMaxi, AgeMini, AgeRecommande, IdDependance->DependanceLangage->IdDependance
+::
+Extension: IdJeuBase->Jeu->IdJeu, _IdExtension->Jeu->IdJeu
+:
+NbJoueurs: IdJeu->Jeu->IdJeu, _IdNbJoueurs, Type, Minimum, Maximum
+:
+
+DependanceLangage: IdDependance, LibelleDependance
+
+:
+SousDomaineJeu: IdJeu->Jeu->IdJeu, _IdSousDomaine->Famille->IdFamille
+:::
+Reimplementation: IdJeuBase->Jeu->IdJeu, _IdReimplementation->Jeu->IdJeu
+:
+Accessoire: IdJeuSociete->Jeu->IdJeu, _IdAccessoire->Jeu->IdJeu
+
+
+:
+Famille: IdFamille, NomFamille, SousTypeFamille, Description
+:
+FamilleJeu: IdJeu->Jeu->IdJeu, _FamilleJeu->Famille->IdFamille
+::::
+:
+::
+

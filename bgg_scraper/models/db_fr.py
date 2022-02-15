@@ -3,7 +3,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 
-from bgg_scrap.models.meta import Base
+from bgg_scraper.models.meta import Base
 
 artist_table = Table('ArtisteJeu', Base.metadata,
                      Column('IdJeu', Integer, ForeignKey('Jeu.IdJeu'), nullable=False, primary_key=True),

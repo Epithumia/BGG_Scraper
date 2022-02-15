@@ -154,7 +154,7 @@ def parse_property(bgg_property, property_type):
         return p
     else:
         logger.error('Unknown:' + bgg_property)
-        raise Exception()
+        raise RuntimeError()
 
 
 def parse_family(label, subtype):
@@ -255,9 +255,9 @@ def parse_family(label, subtype):
 
 def parse_game_data(game_data, game_stats):
     if 'item' not in game_data.keys():
-        raise Exception(game_data)
+        raise KeyError(game_data)
     item = game_data['item']
-    if item['itemstate'] != 'accepted':
+    if item['itemstate'] != 'approved':
         logger.info(item['itemstate'] + ': ' + item['subtype'] + ' (item #' + str(item['objectid']) + ')')
         return None, []
 
@@ -787,7 +787,7 @@ def process_fetch(queue):
                         count += 1
             if not version:
                 queue.put(thing)
-                logger.warning("Requeuing", thing)
+                logger.warning("Requeuing %s", thing)
             else:
                 g.versions.append(version)
         for entry in subgames['bgaccessoryversion']:
@@ -829,12 +829,12 @@ if __name__ == "__main__":
     http = urllib3.PoolManager()
     retries = Retry(connect=5, read=2, redirect=5, backoff_factor=0.5)
     # execute only if run as a script
-    parser = argparse.ArgumentParser(prog='bgg_scrap')
+    parser = argparse.ArgumentParser(prog='bgg-scraper')
     group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-m", "--max-game-id", type=int, nargs='+', default=42,
-                       help="Parse all the games up to MAX_GAME_ID (~300000)")
+    group.add_argument("-m", "--max-game-id", type=int, nargs='+', default=None, metavar=('GAME_ID', 'MAX_GAME_ID'),
+                       help="Parse all the games up to GAME_ID (~350000 at this time) or between GAME_ID and MAX_GAME_ID")
     group.add_argument("-i", "--game-id", type=int, nargs='+', default=42,
-                       help="Parse only GAME_ID")
+                       help="Parse only GAME_ID or a list of GAME_IDs")
     group.add_argument('-r', '--recover', action='store_true', dest='r',
                        help="Recover from saved data")
     parser.add_argument('-fr', action="store_true",
@@ -847,14 +847,14 @@ if __name__ == "__main__":
                         help="Verbose")
     # Actual max right now : 300000
     args = parser.parse_args()
-    from bgg_scrap.models.meta import Base
+    from bgg_scraper.models.meta import Base
 
     if args.fr:
-        from bgg_scrap.models.db_fr import *
+        from bgg_scraper.models.db_fr import *
 
         engine = create_engine('sqlite:///bgg_fr.sqlite', echo=args.dsql)
     else:
-        from bgg_scrap.models.db_en import *
+        from bgg_scraper.models.db_en import *
 
         engine = create_engine('sqlite:///bgg_en.sqlite', echo=args.dsql)
     if args.d:

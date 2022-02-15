@@ -28,18 +28,18 @@ def merge_cache_files(target='cache'):
 
 def delete_inaccepted(session, basis='rejected', fr=True):
     if fr:
-        from bgg_scrap.models.db_fr import Game, NbPlayers
+        from bgg_scraper.models.db_fr import Game, NbPlayers
     else:
-        from bgg_scrap.models.db_en import Game, NbPlayers
+        from bgg_scraper.models.db_en import Game, NbPlayers
     final = pickle.load(open(basis + '.pickle', 'rb'))
     pb = tqdm.tqdm(total=len(final))
 
     for data, stats in final:
-        id = data['item']['objectid']
-        geekitem = session.query(Game).filter(Game.id == int(id))
+        id_item = data['item']['objectid']
+        geekitem = session.query(Game).filter(Game.id == int(id_item))
         if geekitem.count() == 1:
             g = geekitem.one()
-            nbp = session.query(NbPlayers).filter(NbPlayers.game_id == int(id)).all()
+            nbp = session.query(NbPlayers).filter(NbPlayers.game_id == int(id_item)).all()
             for x in nbp:
                 session.delete(x)
             session.delete(g)
