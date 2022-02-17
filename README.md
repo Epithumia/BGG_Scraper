@@ -4,6 +4,11 @@ BGG Scraper
 Outil de récupération ("Scraper") pour récupérer les données de BGG et les mettre sous forme de base de données
 relationnelle.
 
+Installation
+------------
+
+```pip install git+https://github.com/Epithumia/BGG_Scraper.git```
+
 Utilisation
 -----------
 
